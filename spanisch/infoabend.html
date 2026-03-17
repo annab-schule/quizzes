@@ -312,15 +312,100 @@ font-family: ‘Palatino Linotype’, Georgia, serif;
 @media (max-width: 500px) {
 .card, .result-card { padding: 1.8rem 1.4rem; }
 }
+
+/* ── QR Button ── */
+.qr-btn {
+background: none;
+border: 1.5px solid #4a2810;
+border-radius: 8px;
+color: #a0876a;
+cursor: pointer;
+font-size: 1.1rem;
+width: 34px;
+height: 34px;
+display: flex;
+align-items: center;
+justify-content: center;
+transition: border-color 0.15s, color 0.15s;
+flex-shrink: 0;
+}
+.qr-btn:hover { border-color: #e8522a; color: #f5ede0; }
+
+.qr-overlay {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.75);
+z-index: 100;
+align-items: center;
+justify-content: center;
+}
+.qr-overlay.open { display: flex; }
+
+.qr-modal {
+background: #fdfaf5;
+border-radius: 20px;
+padding: 2rem;
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 1rem;
+max-width: 300px;
+width: 90%;
+}
+
+.qr-modal-title {
+font-family: ‘Palatino Linotype’, Georgia, serif;
+font-size: 1.1rem;
+font-weight: 600;
+color: #1a1410;
+text-align: center;
+}
+
+.qr-modal-sub {
+font-size: 0.75rem;
+color: #6b5f52;
+text-align: center;
+word-break: break-all;
+}
+
+#qr-canvas {
+border-radius: 10px;
+}
+
+.qr-close {
+background: #1a0a00;
+color: #f5ede0;
+border: none;
+border-radius: 10px;
+padding: 0.6rem 2rem;
+font-size: 0.88rem;
+font-family: inherit;
+cursor: pointer;
+margin-top: 0.3rem;
+}
+.qr-close:hover { background: #3a1a08; }
 </style>
 
 </head>
 <body>
 
+<!-- QR Overlay -->
+
+<div class="qr-overlay" id="qr-overlay" onclick="closeQR(event)">
+  <div class="qr-modal">
+    <div class="qr-modal-title">Quiz teilen</div>
+    <canvas id="qr-canvas" width="200" height="200"></canvas>
+    <div class="qr-modal-sub" id="qr-url"></div>
+    <button class="qr-close" onclick="document.getElementById('qr-overlay').classList.remove('open')">Schließen</button>
+  </div>
+</div>
+
 <div class="top-bar">
   <a class="back-link" href="../index.html">← Zurück</a>
   <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
   <div class="progress-label" id="prog-label">1 / 8</div>
+  <button class="qr-btn" onclick="openQR()" title="QR-Code anzeigen">⊞</button>
 </div>
 
 <!-- ═══════════════════════════════════════════ -->
@@ -677,6 +762,51 @@ font-family: ‘Palatino Linotype’, Georgia, serif;
   }
 
   updateProgress();
+</script>
+
+<!-- QR Code Generator (qrcode.js, keine externe Abhängigkeit zur Laufzeit nötig) -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+  function openQR() {
+    const url = window.location.href;
+    document.getElementById('qr-url').textContent = url;
+    const canvas = document.getElementById('qr-canvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, 200, 200);
+
+    // QRCode in temporäres div rendern, dann auf Canvas zeichnen
+    const tmp = document.createElement('div');
+    new QRCode(tmp, {
+      text: url,
+      width: 200,
+      height: 200,
+      colorDark: '#1a1410',
+      colorLight: '#fdfaf5',
+      correctLevel: QRCode.CorrectLevel.M
+    });
+
+    // Kurz warten bis QRCode gerendert hat, dann als Bild auf Canvas
+    setTimeout(() => {
+      const img = tmp.querySelector('img') || tmp.querySelector('canvas');
+      if (img && img.tagName === 'IMG') {
+        const i = new Image();
+        i.onload = () => ctx.drawImage(i, 0, 0, 200, 200);
+        i.src = img.src;
+      } else if (img && img.tagName === 'CANVAS') {
+        ctx.drawImage(img, 0, 0, 200, 200);
+      }
+    }, 100);
+
+    document.getElementById('qr-overlay').classList.add('open');
+  }
+
+  function closeQR(e) {
+    if (e.target === document.getElementById('qr-overlay')) {
+      document.getElementById('qr-overlay').classList.remove('open');
+    }
+  }
 </script>
 
 </body>
