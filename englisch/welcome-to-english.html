@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="quiz-meta" content="Klasse 5–6 · Willkommen im Englischunterricht – Fun Facts & Popkultur">
+  <title>🌍 Welcome to English! – Quiz</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Playfair+Display:wght@700&display=swap');
+
+```
+:root {
+  --bg: #f0f4ff;
+  --card: #ffffff;
+  --accent: #2d5a9e;
+  --accent2: #f59e0b;
+  --accent3: #10b981;
+  --danger: #ef4444;
+  --text: #1e293b;
+  --muted: #64748b;
+  --radius: 16px;
+  --shadow: 0 4px 24px rgba(45,90,158,0.10);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Nunito', 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding: 0 0 60px;
+}
+
+/* ── Header ── */
+.header {
+  background: linear-gradient(135deg, var(--accent) 0%, #1a3a6e 100%);
+  color: white;
+  padding: 28px 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '🌍';
+  position: absolute; right: 80px; top: 10px;
+  font-size: 72px; opacity: 0.15;
+}
+.header h1 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: clamp(1.4rem, 4vw, 2rem);
+  line-height: 1.2;
+}
+.header p {
+  font-size: 0.9rem; opacity: 0.85; margin-top: 4px;
+}
+
+/* ── Progress ── */
+.progress-wrap {
+  background: rgba(255,255,255,0.2);
+  border-radius: 99px;
+  height: 8px;
+  margin-top: 16px;
+  overflow: hidden;
+}
+.progress-bar {
+  background: var(--accent2);
+  height: 100%;
+  border-radius: 99px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+.progress-label {
+  font-size: 0.78rem;
+  opacity: 0.8;
+  margin-top: 6px;
+}
+
+/* ── QR Button ── */
+.qr-btn {
+  position: absolute; top: 20px; right: 20px;
+  background: rgba(255,255,255,0.18);
+  border: 2px solid rgba(255,255,255,0.4);
+  color: white;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 1.2rem;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+}
+.qr-btn:hover { background: rgba(255,255,255,0.3); }
+
+/* ── QR Modal ── */
+.qr-modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+}
+.qr-modal.open { display: flex; }
+.qr-box {
+  background: white;
+  border-radius: var(--radius);
+  padding: 28px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+}
+.qr-box h3 { font-family: 'Playfair Display', serif; margin-bottom: 12px; color: var(--accent); }
+.qr-box p { font-size: 0.85rem; color: var(--muted); margin-top: 12px; }
+.qr-close {
+  margin-top: 16px;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 24px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+/* ── Main ── */
+main {
+  max-width: 680px;
+  margin: 32px auto 0;
+  padding: 0 16px;
+}
+
+/* ── Question Card ── */
+.question-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 28px 24px;
+  animation: fadeUp 0.35s ease both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.q-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+.q-number {
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+}
+.q-category {
+  background: #eef2ff;
+  color: var(--accent);
+  border-radius: 8px;
+  padding: 3px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+.q-emoji {
+  font-size: 2.6rem;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.q-text {
+  font-size: 1.15rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 20px;
+  color: var(--text);
+}
+
+/* ── Answer Buttons ── */
+.answers {
+  display: grid;
+  gap: 10px;
+}
+
+.answer-btn {
+  background: #f8faff;
+  border: 2px solid #dde4f5;
+  border-radius: 12px;
+  padding: 13px 18px;
+  text-align: left;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.answer-btn:hover:not(:disabled) {
+  background: #eef2ff;
+  border-color: var(--accent);
+  transform: translateX(4px);
+}
+.answer-btn .letter {
+  min-width: 30px; height: 30px;
+  background: var(--accent);
+  color: white;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.85rem;
+  font-weight: 900;
+}
+.answer-btn.correct {
+  background: #ecfdf5;
+  border-color: var(--accent3);
+  color: #065f46;
+}
+.answer-btn.correct .letter { background: var(--accent3); }
+.answer-btn.wrong {
+  background: #fef2f2;
+  border-color: var(--danger);
+  color: #7f1d1d;
+}
+.answer-btn.wrong .letter { background: var(--danger); }
+.answer-btn:disabled { cursor: default; }
+
+/* ── Feedback ── */
+.feedback {
+  display: none;
+  margin-top: 16px;
+  border-radius: 12px;
+  padding: 14px 18px;
+  font-size: 0.93rem;
+  line-height: 1.5;
+  animation: fadeUp 0.25s ease both;
+}
+.feedback.correct-fb {
+  display: block;
+  background: #ecfdf5;
+  border-left: 4px solid var(--accent3);
+  color: #065f46;
+}
+.feedback.wrong-fb {
+  display: block;
+  background: #fff7ed;
+  border-left: 4px solid var(--accent2);
+  color: #92400e;
+}
+.feedback strong { font-weight: 800; }
+
+/* ── Next Button ── */
+.next-btn {
+  display: none;
+  margin-top: 18px;
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+.next-btn:hover { background: #1a3a6e; transform: translateY(-2px); }
+.next-btn.visible { display: block; }
+
+/* ── Score Screen ── */
+.score-screen {
+  display: none;
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 36px 28px;
+  text-align: center;
+  animation: fadeUp 0.4s ease both;
+}
+.score-screen.visible { display: block; }
+
+.score-emoji { font-size: 4rem; margin-bottom: 12px; }
+.score-title {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.7rem;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.score-sub { color: var(--muted); font-size: 0.95rem; margin-bottom: 24px; }
+
+.score-number {
+  font-size: 3.5rem;
+  font-weight: 900;
+  color: var(--accent);
+  line-height: 1;
+}
+.score-of { font-size: 1.1rem; color: var(--muted); margin-bottom: 24px; }
+
+.score-msg {
+  background: #eef2ff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin-bottom: 28px;
+  line-height: 1.5;
+}
+
+.stars { font-size: 2rem; margin-bottom: 16px; }
+
+.again-btn {
+  background: var(--accent2);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 32px;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.again-btn:hover { transform: scale(1.04); }
+
+/* ── Back Link ── */
+.back-link {
+  display: block;
+  text-align: center;
+  margin-top: 24px;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-decoration: none;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+.back-link:hover { opacity: 1; }
+```
+
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="qr-btn" onclick="openQR()" title="QR-Code anzeigen">⊞</button>
+  <h1>🌍 Welcome to English!</h1>
+  <p>Klasse 5–6 · Fun Facts & Popkultur · 12 Fragen</p>
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">Frage 1 von 12</div>
+</div>
+
+<!-- QR Modal -->
+
+<div class="qr-modal" id="qrModal" onclick="closeQR(event)">
+  <div class="qr-box">
+    <h3>📱 Quiz teilen</h3>
+    <div id="qrcode"></div>
+    <p>Scanne den Code mit dem Handy!</p>
+    <button class="qr-close" onclick="closeQR()">Schließen</button>
+  </div>
+</div>
+
+<main>
+  <div class="question-card" id="questionCard">
+    <div class="q-meta">
+      <span class="q-number" id="qNumber">1 / 12</span>
+      <span class="q-category" id="qCategory">Fun Facts</span>
+    </div>
+    <span class="q-emoji" id="qEmoji">🎉</span>
+    <div class="q-text" id="qText">Laden…</div>
+    <div class="answers" id="answersContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Weiter →</button>
+  </div>
+
+  <div class="score-screen" id="scoreScreen">
+    <div class="score-emoji" id="scoreEmoji">🏆</div>
+    <div class="score-title" id="scoreTitle">Well done!</div>
+    <div class="score-sub">Du hast das Quiz beendet!</div>
+    <div class="score-number" id="scoreNumber">0</div>
+    <div class="score-of" id="scoreOf">von 12 Punkten</div>
+    <div class="stars" id="scoreStars">⭐⭐⭐</div>
+    <div class="score-msg" id="scoreMsg">Super gemacht!</div>
+    <button class="again-btn" onclick="restartQuiz()">🔄 Nochmal spielen</button>
+  </div>
+
+<a href="../index.html" class="back-link">← Zurück zur Übersicht</a>
+
+</main>
+
+<script>
+const questions = [
+  {
+    emoji: "🇬🇧",
+    category: "Fun Fact",
+    text: "Wie viele Menschen auf der Welt sprechen Englisch als erste ODER zweite Sprache?",
+    answers: ["Etwa 500 Millionen", "Etwa 1 Milliarde", "Etwa 1,5 Milliarden", "Etwa 3 Milliarden"],
+    correct: 2,
+    feedback: {
+      right: "✅ Genau! Rund 1,5 Milliarden Menschen sprechen Englisch – das ist fast jeder fünfte Mensch auf der Erde. Englisch zu lernen lohnt sich wirklich!",
+      wrong: "💡 Es sind etwa 1,5 Milliarden Menschen! Das ist fast jeder fünfte Mensch weltweit. Deshalb ist Englisch so wichtig."
+    }
+  },
+  {
+    emoji: "🦁",
+    category: "Fun Fact",
+    text: "Welches Tier ist das Nationalsymbol Englands?",
+    answers: ["Der Adler", "Der Löwe", "Der Drache", "Das Einhorn"],
+    correct: 1,
+    feedback: {
+      right: "✅ Super! The lion – der Löwe – steht auf der englischen Flagge und ist Symboltier Englands. \"The Lion King\" lässt grüßen! 🦁",
+      wrong: "💡 Es ist der Löwe – 'the lion'! Tipp: Das Einhorn ('unicorn') ist übrigens das Symboltier Schottlands. Wusstest du das?"
+    }
+  },
+  {
+    emoji: "🎵",
+    category: "Popkultur",
+    text: "Die Beatles kamen aus England und sind eine der berühmtesten Bands aller Zeiten. Aus welcher Stadt kamen sie?",
+    answers: ["London", "Manchester", "Liverpool", "Birmingham"],
+    correct: 2,
+    feedback: {
+      right: "✅ Yes! The Beatles came from Liverpool! Songs wie \"Let It Be\" und \"Hey Jude\" kennt die ganze Welt. 🎶",
+      wrong: "💡 The Beatles came from Liverpool! Die Stadt im Nordwesten Englands ist heute ein Pilgerziel für Musikfans aus aller Welt."
+    }
+  },
+  {
+    emoji: "🧙",
+    category: "Popkultur",
+    text: "Harry Potter sagt seinen berühmtesten Spruch. Welcher englische Ausdruck passt zu seiner Schule Hogwarts?",
+    answers: ["\"School of Rock\"", "\"School of Magic\"", "\"Hogwarts School of Witchcraft and Wizardry\"", "\"School of Spells and Dragons\""],
+    correct: 2,
+    feedback: {
+      right: "✅ Richtig! Der volle Name ist \"Hogwarts School of Witchcraft and Wizardry\" – also Schule für Hexerei und Zauberei. Witchcraft = Hexerei! 🧙‍♂️",
+      wrong: "💡 Der offizielle Name ist \"Hogwarts School of Witchcraft and Wizardry\". Witchcraft bedeutet Hexerei – das Wort kannst du dir gut merken!"
+    }
+  },
+  {
+    emoji: "🌦️",
+    category: "Fun Fact",
+    text: "Für was ist das Wetter in Großbritannien besonders bekannt?",
+    answers: ["Sehr viel Sonne und Hitze", "Häufigen Regen und Bewölkung", "Schneestürme im Sommer", "Tropische Temperaturen"],
+    correct: 1,
+    feedback: {
+      right: "✅ Genau! The British weather is famously rainy! Briten reden daher sehr viel über das Wetter. \"Lovely weather, isn't it?\" ist ein typischer Smalltalk! ☂️",
+      wrong: "💡 Großbritannien ist berühmt für sein regnerisches Wetter! Deshalb ist \"How's the weather?\" in England fast schon eine Kunstform des Gesprächs."
+    }
+  },
+  {
+    emoji: "🦸",
+    category: "Popkultur",
+    text: "\"With great power comes great responsibility\" – welchem Superhelden gehört dieses berühmte Zitat?",
+    answers: ["Batman", "Iron Man", "Spider-Man", "Superman"],
+    correct: 2,
+    feedback: {
+      right: "✅ Perfekt! Spider-Man! Das Zitat bedeutet: Mit großer Macht kommt große Verantwortung. Power = Macht, responsibility = Verantwortung – zwei wichtige Wörter! 🕷️",
+      wrong: "💡 Das Zitat gehört Spider-Man! \"With great power comes great responsibility.\" – Power = Macht, responsibility = Verantwortung. Gut merken!"
+    }
+  },
+  {
+    emoji: "🎄",
+    category: "Fun Fact",
+    text: "Wie sagt man \"Frohe Weihnachten\" auf Englisch?",
+    answers: ["Happy Christmas Day", "Merry Christmas", "Good Christmas", "Happy X-Day"],
+    correct: 1,
+    feedback: {
+      right: "✅ Yes! \"Merry Christmas!\" Merry bedeutet fröhlich – ein bisschen altmodisch, aber bei Weihnachten ist es der klassische Ausdruck! 🎅",
+      wrong: "💡 \"Merry Christmas!\" ist der richtige Ausdruck. Merry ist ein etwas altmodisches Wort für fröhlich – es wird fast nur zu Weihnachten benutzt!"
+    }
+  },
+  {
+    emoji: "🍕",
+    category: "Fun Fact",
+    text: "Was essen Briten traditionell als berühmtes Nationalgericht?",
+    answers: ["Fish and Chips", "Pizza and Pasta", "Sushi and Rice", "Tacos and Nachos"],
+    correct: 0,
+    feedback: {
+      right: "✅ Richtig! Fish and Chips – Fisch im Teigmantel mit Pommes – ist DAS britische Traditionsgericht. You should try it! 🐟",
+      wrong: "💡 Fish and Chips ist das berühmteste britische Gericht! Fisch im Teigmantel mit Pommes – in England gibt es dafür extra \"Chip Shops\"."
+    }
+  },
+  {
+    emoji: "🦁👑",
+    category: "Popkultur",
+    text: "In \"The Lion King\" singt Simba ein berühmtes Lied. Wie heißt es auf Englisch?",
+    answers: ["\"Can You Hear Me Roar\"", "\"Hakuna Matata\"", "\"Pride Rock Song\"", "\"Africa Forever\""],
+    correct: 1,
+    feedback: {
+      right: "✅ Hakuna Matata! Es bedeutet auf Swahili \"keine Sorgen\" – und es wurde in Englisch bekannt durch den Film. \"It means no worries!\" 🌈",
+      wrong: "💡 \"Hakuna Matata\"! Das Wort kommt aus dem Swahili und bedeutet \"keine Sorgen\". Im Film auf Englisch: \"It means no worries for the rest of your days!\""
+    }
+  },
+  {
+    emoji: "🗺️",
+    category: "Fun Fact",
+    text: "In wie vielen Ländern ist Englisch die offizielle Amtssprache?",
+    answers: ["In etwa 10 Ländern", "In etwa 25 Ländern", "In mehr als 50 Ländern", "In nur 5 Ländern"],
+    correct: 2,
+    feedback: {
+      right: "✅ Wow, genau! Englisch ist in über 50 Ländern Amtssprache – von den USA über Australien bis Nigeria. English is truly a world language! 🌍",
+      wrong: "💡 Englisch ist in mehr als 50 Ländern Amtssprache! USA, Australien, Kanada, Nigeria, Indien... English is truly a world language!"
+    }
+  },
+  {
+    emoji: "🎮",
+    category: "Popkultur",
+    text: "In Videospielen hörst du oft \"Game Over\". Was bedeutet das auf Deutsch?",
+    answers: ["Spiel läuft noch", "Spiel pausiert", "Spiel ist vorbei", "Spiel startet neu"],
+    correct: 2,
+    feedback: {
+      right: "✅ Richtig! Game = Spiel, over = vorbei/zu Ende. \"Game Over\" kennst du sicher – jetzt weißt du auch warum! 🎮",
+      wrong: "💡 Game Over bedeutet: Das Spiel ist vorbei! Game = Spiel, over = vorbei. Du benutzt Englisch beim Zocken schon – ohne es zu merken!"
+    }
+  },
+  {
+    emoji: "🏰",
+    category: "Fun Fact",
+    text: "Wie heißt das berühmte Schloss/Palast, in dem die britische Königsfamilie in London wohnt?",
+    answers: ["Windsor Palace", "Buckingham Palace", "London Castle", "Royal House"],
+    correct: 1,
+    feedback: {
+      right: "✅ Perfekt! Buckingham Palace ist die offizielle Residenz der britischen Königsfamilie. Jährlich besuchen Millionen Touristen das Gebäude. Palace = Palast! 👑",
+      wrong: "💡 Es ist der Buckingham Palace! Palace bedeutet Palast. Er liegt mitten in London und ist eine der meistbesuchten Sehenswürdigkeiten der Welt."
+    }
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function renderQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById('qNumber').textContent = `${current + 1} / ${questions.length}`;
+  document.getElementById('qCategory').textContent = q.category;
+  document.getElementById('qEmoji').textContent = q.emoji;
+  document.getElementById('qText').textContent = q.text;
+
+  // Progress
+  const pct = (current / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `Frage ${current + 1} von ${questions.length}`;
+
+  // Answers
+  const letters = ['A', 'B', 'C', 'D'];
+  const container = document.getElementById('answersContainer');
+  container.innerHTML = '';
+  q.answers.forEach((ans, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = `<span class="letter">${letters[i]}</span>${ans}`;
+    btn.onclick = () => selectAnswer(i);
+    container.appendChild(btn);
+  });
+
+  // Reset feedback / next
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  // Animate card
+  const card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = '';
+}
+
+function selectAnswer(index) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedback');
+
+  if (index === q.correct) {
+    score++;
+    btns[index].classList.add('correct');
+    fb.className = 'feedback correct-fb';
+    fb.innerHTML = q.feedback.right;
+  } else {
+    btns[index].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback wrong-fb';
+    fb.innerHTML = q.feedback.wrong;
+  }
+
+  document.getElementById('nextBtn').className = 'next-btn visible';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showScore();
+  } else {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function showScore() {
+  document.getElementById('questionCard').style.display = 'none';
+  const screen = document.getElementById('scoreScreen');
+  screen.classList.add('visible');
+
+  const pct = score / questions.length;
+  document.getElementById('scoreNumber').textContent = score;
+  document.getElementById('scoreOf').textContent = `von ${questions.length} Punkten`;
+
+  let emoji, title, stars, msg;
+  if (pct >= 0.9) {
+    emoji = '🏆'; title = 'Amazing!'; stars = '⭐⭐⭐⭐⭐';
+    msg = 'Wow – du bist ein echter English Star! Du weißt schon eine Menge. Der Unterricht wird dir Spaß machen! 🚀';
+  } else if (pct >= 0.7) {
+    emoji = '🎉'; title = 'Great job!'; stars = '⭐⭐⭐⭐';
+    msg = 'Richtig gut! Du hast schon viel Wissen. Im Unterricht wirst du noch viel mehr entdecken! 💪';
+  } else if (pct >= 0.5) {
+    emoji = '😊'; title = 'Well done!'; stars = '⭐⭐⭐';
+    msg = 'Super gemacht! Du hast einiges gewusst – und das Beste: Im Englischunterricht lernst du alles andere noch! 📚';
+  } else {
+    emoji = '🌱'; title = 'Good start!'; stars = '⭐⭐';
+    msg = 'Ein toller Anfang! Alles, was du noch nicht wusstest, lernst du jetzt im Unterricht. Das macht Spaß – versprochen! 😄';
+  }
+
+  document.getElementById('scoreEmoji').textContent = emoji;
+  document.getElementById('scoreTitle').textContent = title;
+  document.getElementById('scoreStars').textContent = stars;
+  document.getElementById('scoreMsg').textContent = msg;
+
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Fertig! 🎉';
+
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  document.getElementById('scoreScreen').classList.remove('visible');
+  document.getElementById('questionCard').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// QR Code
+let qrGenerated = false;
+function openQR() {
+  document.getElementById('qrModal').classList.add('open');
+  if (!qrGenerated) {
+    new QRCode(document.getElementById('qrcode'), {
+      text: window.location.href,
+      width: 180, height: 180,
+      colorDark: '#2d5a9e', colorLight: '#ffffff'
+    });
+    qrGenerated = true;
+  }
+}
+function closeQR(e) {
+  if (!e || e.target === document.getElementById('qrModal')) {
+    document.getElementById('qrModal').classList.remove('open');
+  }
+}
+
+// Start
+renderQuestion();
+</script>
+
+</body>
+</html>
