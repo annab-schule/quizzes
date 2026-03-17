@@ -5,8 +5,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Quiz-Sammlung</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  /* Schöne Systemschriften – funktioniert ohne Internet, auf jedem Gerät */
+  :root {
+    --font-display: 'Palatino Linotype', 'Book Antiqua', Palatino, 'Georgia', serif;
+    --font-body: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  }
+</style>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -26,7 +31,7 @@
 }
 
 body {
-font-family: ‘DM Sans’, sans-serif;
+font-family: var(–font-body);
 background: var(–bg);
 color: var(–ink);
 min-height: 100vh;
@@ -46,7 +51,7 @@ margin-bottom: 3rem;
 }
 
 .header-left h1 {
-font-family: ‘Fraunces’, serif;
+font-family: var(–font-display);
 font-size: clamp(2.2rem, 5vw, 3.2rem);
 font-weight: 600;
 line-height: 1.1;
@@ -66,7 +71,7 @@ line-height: 1.6;
 }
 
 .quiz-count {
-font-family: ‘Fraunces’, serif;
+font-family: var(–font-display);
 font-size: 2rem;
 font-weight: 600;
 display: block;
@@ -92,7 +97,7 @@ margin-bottom: 1.2rem;
 }
 
 .section-label {
-font-family: ‘Fraunces’, serif;
+font-family: var(–font-display);
 font-size: 1.4rem;
 font-weight: 600;
 letter-spacing: -0.01em;
@@ -168,7 +173,7 @@ box-shadow: 0 8px 24px rgba(0,0,0,0.08);
 .misc .quiz-card:hover { border-color: var(–misc); }
 
 .quiz-title {
-font-family: ‘Fraunces’, serif;
+font-family: var(–font-display);
 font-size: 1.05rem;
 font-weight: 600;
 line-height: 1.3;
