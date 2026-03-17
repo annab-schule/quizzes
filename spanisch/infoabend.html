@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spanisch – Kennst du das schon?</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+font-family: -apple-system, ‘Segoe UI’, system-ui, sans-serif;
+background: #1a0a00;
+color: #f5ede0;
+min-height: 100vh;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: flex-start;
+padding: 2rem 1rem 4rem;
+}
+
+/* ── Header ── */
+.top-bar {
+width: 100%;
+max-width: 680px;
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-bottom: 2.5rem;
+}
+
+.back-link {
+font-size: 0.8rem;
+color: #a0876a;
+text-decoration: none;
+letter-spacing: 0.04em;
+}
+.back-link:hover { color: #f5ede0; }
+
+.progress-bar {
+flex: 1;
+margin: 0 1.5rem;
+height: 4px;
+background: #3a2010;
+border-radius: 2px;
+overflow: hidden;
+}
+.progress-fill {
+height: 100%;
+background: #e8522a;
+border-radius: 2px;
+transition: width 0.4s ease;
+width: 0%;
+}
+
+.progress-label {
+font-size: 0.78rem;
+color: #a0876a;
+min-width: 48px;
+text-align: right;
+}
+
+/* ── Card ── */
+.card {
+width: 100%;
+max-width: 680px;
+background: #2a1200;
+border: 1px solid #4a2810;
+border-radius: 20px;
+padding: 2.5rem 2.5rem 2rem;
+display: none;
+flex-direction: column;
+gap: 1.8rem;
+animation: fadeIn 0.3s ease;
+}
+.card.active { display: flex; }
+
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(8px); }
+to   { opacity: 1; transform: translateY(0); }
+}
+
+.card-type {
+font-size: 0.7rem;
+font-weight: 600;
+letter-spacing: 0.12em;
+text-transform: uppercase;
+color: #e8522a;
+}
+
+.card-question {
+font-family: ‘Palatino Linotype’, Georgia, serif;
+font-size: clamp(1.3rem, 3.5vw, 1.7rem);
+font-weight: 600;
+line-height: 1.35;
+color: #f5ede0;
+}
+
+.card-question .highlight {
+color: #f0b040;
+font-style: italic;
+}
+
+.card-hint {
+font-size: 0.82rem;
+color: #a0876a;
+font-style: italic;
+}
+
+/* ── Antwort-Buttons ── */
+.options {
+display: flex;
+flex-direction: column;
+gap: 0.7rem;
+}
+
+.option-btn {
+background: #3a1a08;
+border: 1.5px solid #5a3018;
+border-radius: 12px;
+padding: 0.85rem 1.2rem;
+color: #f5ede0;
+font-size: 0.95rem;
+font-family: inherit;
+cursor: pointer;
+text-align: left;
+transition: background 0.15s, border-color 0.15s, transform 0.1s;
+display: flex;
+align-items: center;
+gap: 0.8rem;
+}
+
+.option-btn:hover:not(:disabled) {
+background: #4a2410;
+border-color: #e8522a;
+transform: translateX(3px);
+}
+
+.option-btn .opt-letter {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 26px;
+height: 26px;
+border-radius: 50%;
+background: #5a3018;
+font-size: 0.78rem;
+font-weight: 700;
+flex-shrink: 0;
+transition: background 0.15s;
+}
+
+.option-btn.correct {
+background: #0f3020;
+border-color: #2d8a50;
+color: #a0f0b0;
+}
+.option-btn.correct .opt-letter { background: #2d8a50; color: #fff; }
+
+.option-btn.wrong {
+background: #3a0808;
+border-color: #8a2020;
+color: #f0a0a0;
+}
+.option-btn.wrong .opt-letter { background: #8a2020; color: #fff; }
+
+.option-btn.reveal-correct {
+background: #0f3020;
+border-color: #2d8a50;
+color: #a0f0b0;
+opacity: 0.7;
+}
+
+/* ── Feedback ── */
+.feedback {
+display: none;
+border-radius: 12px;
+padding: 1rem 1.2rem;
+font-size: 0.88rem;
+line-height: 1.6;
+gap: 0.5rem;
+flex-direction: column;
+}
+.feedback.visible { display: flex; }
+
+.feedback.correct-fb {
+background: #0d2818;
+border: 1px solid #2d8a50;
+color: #90dca8;
+}
+.feedback.wrong-fb {
+background: #2a0d0d;
+border: 1px solid #8a3030;
+color: #f0a8a8;
+}
+
+.feedback-title {
+font-weight: 700;
+font-size: 0.95rem;
+}
+
+/* ── Next Button ── */
+.next-btn {
+display: none;
+align-self: flex-end;
+background: #e8522a;
+color: #fff;
+border: none;
+border-radius: 10px;
+padding: 0.75rem 1.8rem;
+font-size: 0.9rem;
+font-weight: 600;
+font-family: inherit;
+cursor: pointer;
+transition: background 0.15s, transform 0.1s;
+letter-spacing: 0.02em;
+}
+.next-btn:hover { background: #c8421a; transform: translateY(-1px); }
+.next-btn.visible { display: block; }
+
+/* ── Fun fact card ── */
+.funfact-card {
+background: #1a0f00;
+border: 1px solid #4a3010;
+border-radius: 14px;
+padding: 1.2rem 1.4rem;
+display: flex;
+gap: 1rem;
+align-items: flex-start;
+}
+.funfact-icon { font-size: 1.6rem; flex-shrink: 0; }
+.funfact-text { font-size: 0.85rem; line-height: 1.6; color: #c8a87a; }
+.funfact-text strong { color: #f0b040; }
+
+/* ── Ergebnis ── */
+.result-card {
+width: 100%;
+max-width: 680px;
+background: #2a1200;
+border: 1px solid #4a2810;
+border-radius: 20px;
+padding: 3rem 2.5rem;
+display: none;
+flex-direction: column;
+align-items: center;
+gap: 1.5rem;
+text-align: center;
+animation: fadeIn 0.4s ease;
+}
+.result-card.active { display: flex; }
+
+.result-emoji { font-size: 3.5rem; }
+
+.result-score {
+font-family: ‘Palatino Linotype’, Georgia, serif;
+font-size: 3rem;
+font-weight: 700;
+color: #f0b040;
+}
+
+.result-title {
+font-family: ‘Palatino Linotype’, Georgia, serif;
+font-size: 1.5rem;
+font-weight: 600;
+color: #f5ede0;
+}
+
+.result-text {
+font-size: 0.9rem;
+color: #a0876a;
+line-height: 1.7;
+max-width: 460px;
+}
+
+.result-cta {
+background: #e8522a;
+color: #fff;
+border: none;
+border-radius: 12px;
+padding: 1rem 2.5rem;
+font-size: 1rem;
+font-weight: 700;
+font-family: inherit;
+cursor: pointer;
+margin-top: 0.5rem;
+transition: background 0.15s, transform 0.1s;
+}
+.result-cta:hover { background: #c8421a; transform: translateY(-2px); }
+
+.result-breakdown {
+display: flex;
+gap: 2rem;
+margin-top: 0.5rem;
+}
+.breakdown-item {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 0.2rem;
+}
+.breakdown-num {
+font-size: 1.8rem;
+font-weight: 700;
+color: #f0b040;
+font-family: ‘Palatino Linotype’, Georgia, serif;
+}
+.breakdown-num.green { color: #5dd880; }
+.breakdown-num.red { color: #f07070; }
+.breakdown-label { font-size: 0.75rem; color: #a0876a; }
+
+@media (max-width: 500px) {
+.card, .result-card { padding: 1.8rem 1.4rem; }
+}
+</style>
+
+</head>
+<body>
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← Zurück</a>
+  <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+  <div class="progress-label" id="prog-label">1 / 8</div>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- FRAGE 1 – Welche Wörter kommen aus dem Spanischen? -->
+
+<div class="card active" id="q1">
+  <span class="card-type">Rate mal</span>
+  <div class="card-question">
+    Welches dieser deutschen Alltagswörter kommt ursprünglich aus dem <span class="highlight">Spanischen</span>?
+  </div>
+  <div class="card-hint">Tipp: Spanisch hat mehr deutsche Wörter beeinflusst als man denkt!</div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q1',false)">
+      <span class="opt-letter">A</span> Ketchup
+    </button>
+    <button class="option-btn" onclick="answer(this,'q1',false)">
+      <span class="opt-letter">B</span> Nudel
+    </button>
+    <button class="option-btn" onclick="answer(this,'q1',true)">
+      <span class="opt-letter">C</span> Gitarre
+    </button>
+    <button class="option-btn" onclick="answer(this,'q1',false)">
+      <span class="opt-letter">D</span> Sofa
+    </button>
+  </div>
+  <div class="feedback" id="fb-q1">
+    <span class="feedback-title">Richtig! 🎸</span>
+    <span>Das Wort <strong>Gitarre</strong> kommt vom spanischen <em>guitarra</em>. Auch Kakao, Tomate, Schokolade und Avocado – alles Wörter, die über Spanisch zu uns kamen. Spanisch hat die Welt geprägt!</span>
+  </div>
+  <button class="next-btn" id="next-q1" onclick="nextCard('q1','q2')">Weiter →</button>
+</div>
+
+<!-- FRAGE 2 – Wie viele Menschen sprechen Spanisch? -->
+
+<div class="card" id="q2">
+  <span class="card-type">Erstaunliche Fakten</span>
+  <div class="card-question">
+    Spanisch ist Muttersprache von <span class="highlight">wie vielen Menschen</span> weltweit?
+  </div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q2',false)">
+      <span class="opt-letter">A</span> Ca. 150 Millionen
+    </button>
+    <button class="option-btn" onclick="answer(this,'q2',false)">
+      <span class="opt-letter">B</span> Ca. 300 Millionen
+    </button>
+    <button class="option-btn" onclick="answer(this,'q2',true)">
+      <span class="opt-letter">C</span> Über 500 Millionen
+    </button>
+    <button class="option-btn" onclick="answer(this,'q2',false)">
+      <span class="opt-letter">D</span> Ca. 80 Millionen
+    </button>
+  </div>
+  <div class="feedback" id="fb-q2">
+    <span class="feedback-title">Riesig! 🌍</span>
+    <span>Über <strong>500 Millionen Menschen</strong> sprechen Spanisch als Muttersprache – damit ist es die zweitgrößte Muttersprache der Welt. In <strong>21 Ländern</strong> ist es Amtssprache. Mit Spanisch kannst du von Mexiko bis Argentinien, von Spanien bis auf die Kanarischen Inseln reisen!</span>
+  </div>
+  <button class="next-btn" id="next-q2" onclick="nextCard('q2','q3')">Weiter →</button>
+</div>
+
+<!-- FRAGE 3 – Welches spanische Wort kennst du schon? -->
+
+<div class="card" id="q3">
+  <span class="card-type">Schon Spanisch können!</span>
+  <div class="card-question">
+    Was bedeutet das spanische Wort <span class="highlight">„biblioteca"</span>?
+  </div>
+  <div class="card-hint">Schau genau hin – es steckt ein bekanntes Wort drin...</div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q3',false)">
+      <span class="opt-letter">A</span> Apotheke
+    </button>
+    <button class="option-btn" onclick="answer(this,'q3',true)">
+      <span class="opt-letter">B</span> Bibliothek
+    </button>
+    <button class="option-btn" onclick="answer(this,'q3',false)">
+      <span class="opt-letter">C</span> Disco
+    </button>
+    <button class="option-btn" onclick="answer(this,'q3',false)">
+      <span class="opt-letter">D</span> Café
+    </button>
+  </div>
+  <div class="feedback" id="fb-q3">
+    <span class="feedback-title">Du sprichst schon Spanisch! 📚</span>
+    <span>Genau – <strong>biblioteca</strong> heißt Bibliothek. Hunderte Wörter sehen im Spanischen fast genauso aus wie im Deutschen oder Englischen: <em>hospital, animal, hotel, doctor, música, natural</em> ... Du weißt schon viel mehr als du denkst!</span>
+  </div>
+  <button class="next-btn" id="next-q3" onclick="nextCard('q3','q4')">Weiter →</button>
+</div>
+
+<!-- FRAGE 4 – Länder-Quiz -->
+
+<div class="card" id="q4">
+  <span class="card-type">Geografie-Check</span>
+  <div class="card-question">
+    In welchem dieser Länder wird <span class="highlight">kein Spanisch</span> gesprochen?
+  </div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q4',false)">
+      <span class="opt-letter">A</span> Peru 🇵🇪
+    </button>
+    <button class="option-btn" onclick="answer(this,'q4',true)">
+      <span class="opt-letter">B</span> Brasilien 🇧🇷
+    </button>
+    <button class="option-btn" onclick="answer(this,'q4',false)">
+      <span class="opt-letter">C</span> Kuba 🇨🇺
+    </button>
+    <button class="option-btn" onclick="answer(this,'q4',false)">
+      <span class="opt-letter">D</span> Uruguay 🇺🇾
+    </button>
+  </div>
+  <div class="feedback" id="fb-q4">
+    <span class="feedback-title">Guter Trick-Versuch! 🇧🇷</span>
+    <span>In <strong>Brasilien</strong> spricht man <em>Portugiesisch</em> – das klingt ähnlich wie Spanisch, ist aber eine eigene Sprache. Peru, Kuba, Uruguay und 18 weitere Länder sind spanischsprachig. Fast ganz Lateinamerika!</span>
+  </div>
+  <button class="next-btn" id="next-q4" onclick="nextCard('q4','q5')">Weiter →</button>
+</div>
+
+<!-- FRAGE 5 – Musik & Kultur -->
+
+<div class="card" id="q5">
+  <span class="card-type">Musik & Kultur</span>
+  <div class="card-question">
+    Welcher dieser weltbekannten Musikstile kommt aus der <span class="highlight">spanischsprachigen Welt</span>?
+  </div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q5',false)">
+      <span class="opt-letter">A</span> Jazz
+    </button>
+    <button class="option-btn" onclick="answer(this,'q5',true)">
+      <span class="opt-letter">B</span> Reggaeton
+    </button>
+    <button class="option-btn" onclick="answer(this,'q5',false)">
+      <span class="opt-letter">C</span> K-Pop
+    </button>
+    <button class="option-btn" onclick="answer(this,'q5',false)">
+      <span class="opt-letter">D</span> Afrobeats
+    </button>
+  </div>
+  <div class="feedback" id="fb-q5">
+    <span class="feedback-title">¡Exacto! 🎵</span>
+    <span><strong>Reggaeton</strong> entstand in Puerto Rico und Panama – komplett spanischsprachig. Künstler wie Bad Bunny, J Balvin oder Rosalía sind global erfolgreich und singen auf Spanisch. Spanisch ist die Sprache der erfolgreichsten Popmusik weltweit!</span>
+  </div>
+  <button class="next-btn" id="next-q5" onclick="nextCard('q5','q6')">Weiter →</button>
+</div>
+
+<!-- FRAGE 6 – Einfache Grammatik -->
+
+<div class="card" id="q6">
+  <span class="card-type">Erste Spanisch-Stunde</span>
+  <div class="card-question">
+    Wie sagt man auf Spanisch <span class="highlight">„Guten Morgen"</span>?
+  </div>
+  <div class="card-hint">Du hast das bestimmt schon mal irgendwo gehört oder gelesen...</div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q6',false)">
+      <span class="opt-letter">A</span> Buenas noches
+    </button>
+    <button class="option-btn" onclick="answer(this,'q6',true)">
+      <span class="opt-letter">B</span> Buenos días
+    </button>
+    <button class="option-btn" onclick="answer(this,'q6',false)">
+      <span class="opt-letter">C</span> Hasta luego
+    </button>
+    <button class="option-btn" onclick="answer(this,'q6',false)">
+      <span class="opt-letter">D</span> Por favor
+    </button>
+  </div>
+  <div class="feedback" id="fb-q6">
+    <span class="feedback-title">¡Buenos días! ☀️</span>
+    <span>Du hast gerade dein erstes richtiges Spanisch gesprochen! <strong>Buenos días</strong> = Guten Morgen. <em>Buenas noches</em> = Gute Nacht, <em>Hasta luego</em> = Tschüss, <em>Por favor</em> = Bitte. Nach 5 Minuten Spanisch kennst du schon 4 Sätze!</span>
+  </div>
+  <button class="next-btn" id="next-q6" onclick="nextCard('q6','q7')">Weiter →</button>
+</div>
+
+<!-- FRAGE 7 – Spanisch in der Zukunft -->
+
+<div class="card" id="q7">
+  <span class="card-type">Zukunftswissen</span>
+  <div class="card-question">
+    In welchem Land leben die <span class="highlight">meisten Spanischsprachigen</span> weltweit?
+  </div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q7',false)">
+      <span class="opt-letter">A</span> Spanien 🇪🇸
+    </button>
+    <button class="option-btn" onclick="answer(this,'q7',false)">
+      <span class="opt-letter">B</span> Argentinien 🇦🇷
+    </button>
+    <button class="option-btn" onclick="answer(this,'q7',true)">
+      <span class="opt-letter">C</span> Mexiko 🇲🇽
+    </button>
+    <button class="option-btn" onclick="answer(this,'q7',false)">
+      <span class="opt-letter">D</span> USA 🇺🇸
+    </button>
+  </div>
+  <div class="feedback" id="fb-q7">
+    <span class="feedback-title">¡México! 🌮</span>
+    <span><strong>Mexiko</strong> hat mit über 130 Millionen Menschen die größte spanischsprachige Bevölkerung. Interessant: Die <strong>USA</strong> haben mit ~60 Millionen Spanischsprechern mehr als Spanien selbst! Spanisch ist in Nordamerika auf dem Vormarsch.</span>
+  </div>
+  <button class="next-btn" id="next-q7" onclick="nextCard('q7','q8')">Weiter →</button>
+</div>
+
+<!-- FRAGE 8 – Finale -->
+
+<div class="card" id="q8">
+  <span class="card-type">Die letzte Frage!</span>
+  <div class="card-question">
+    Spanisch gilt als eine der <span class="highlight">einfachsten Sprachen</span> für Deutschsprachige. Was stimmt dabei?
+  </div>
+  <div class="options">
+    <button class="option-btn" onclick="answer(this,'q8',false)">
+      <span class="opt-letter">A</span> Man schreibt genau wie man spricht
+    </button>
+    <button class="option-btn" onclick="answer(this,'q8',false)">
+      <span class="opt-letter">B</span> Es gibt keine unregelmäßigen Verben
+    </button>
+    <button class="option-btn" onclick="answer(this,'q8',false)">
+      <span class="opt-letter">C</span> Viele Wörter ähneln Deutsch oder Englisch
+    </button>
+    <button class="option-btn" onclick="answer(this,'q8',true)">
+      <span class="opt-letter">D</span> A und C stimmen
+    </button>
+  </div>
+  <div class="feedback" id="fb-q8">
+    <span class="feedback-title">Perfecto! 🏆</span>
+    <span>Spanisch spricht man fast immer so, wie man schreibt – keine versteckten Aussprachen. Dazu hunderte Wörter die Deutsch oder Englisch ähneln. Unregelmäßige Verben gibt es schon – aber viel weniger als im Deutschen. Spanisch ist wirklich <strong>eine der leichtesten Fremdsprachen</strong> für uns!</span>
+  </div>
+  <button class="next-btn" id="next-q8" onclick="showResult()">Ergebnis sehen 🎉</button>
+</div>
+
+<!-- ═══════════════════════════════════════════ -->
+
+<!-- ERGEBNIS -->
+
+<div class="result-card" id="result">
+  <div class="result-emoji" id="result-emoji">🎉</div>
+  <div class="result-score" id="result-score">0 / 8</div>
+  <div class="result-title" id="result-title">Super gemacht!</div>
+  <div class="result-breakdown">
+    <div class="breakdown-item">
+      <span class="breakdown-num green" id="correct-count">0</span>
+      <span class="breakdown-label">Richtig</span>
+    </div>
+    <div class="breakdown-item">
+      <span class="breakdown-num red" id="wrong-count">0</span>
+      <span class="breakdown-label">Falsch</span>
+    </div>
+  </div>
+  <div class="result-text" id="result-text">Du hast das Quiz abgeschlossen!</div>
+  <button class="result-cta" onclick="restart()">Nochmal spielen 🔄</button>
+  <a href="../index.html" style="font-size:0.82rem; color:#a0876a; text-decoration:none; margin-top:-0.5rem;">← Zurück zur Übersicht</a>
+</div>
+
+<script>
+  const TOTAL = 8;
+  let correct = 0;
+  let answered = {};
+
+  function answer(btn, qId, isCorrect) {
+    if (answered[qId]) return;
+    answered[qId] = true;
+
+    const card = document.getElementById(qId);
+    const buttons = card.querySelectorAll('.option-btn');
+    const feedback = document.getElementById('fb-' + qId);
+    const nextBtn = document.getElementById('next-' + qId);
+
+    buttons.forEach(b => {
+      b.disabled = true;
+      const wasClicked = b === btn;
+      const handler = b.getAttribute('onclick');
+      const bCorrect = handler && handler.includes('true');
+      if (wasClicked && isCorrect) b.classList.add('correct');
+      else if (wasClicked && !isCorrect) b.classList.add('wrong');
+      else if (!wasClicked && bCorrect) b.classList.add('reveal-correct');
+    });
+
+    if (isCorrect) {
+      correct++;
+      feedback.classList.add('correct-fb');
+    } else {
+      feedback.classList.add('wrong-fb');
+    }
+    feedback.classList.add('visible');
+    nextBtn.classList.add('visible');
+
+    updateProgress();
+  }
+
+  function nextCard(current, next) {
+    document.getElementById(current).classList.remove('active');
+    document.getElementById(next).classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function updateProgress() {
+    const done = Object.keys(answered).length;
+    document.getElementById('progress').style.width = (done / TOTAL * 100) + '%';
+    document.getElementById('prog-label').textContent = (done + 1 > TOTAL ? TOTAL : done + 1) + ' / ' + TOTAL;
+  }
+
+  function showResult() {
+    document.getElementById('q8').classList.remove('active');
+    const result = document.getElementById('result');
+    result.classList.add('active');
+
+    document.getElementById('result-score').textContent = correct + ' / ' + TOTAL;
+    document.getElementById('correct-count').textContent = correct;
+    document.getElementById('wrong-count').textContent = TOTAL - correct;
+    document.getElementById('progress').style.width = '100%';
+    document.getElementById('prog-label').textContent = TOTAL + ' / ' + TOTAL;
+
+    let emoji, title, text;
+    if (correct >= 7) {
+      emoji = '🏆'; title = '¡Increíble! Du bist ein Spanisch-Talent!';
+      text = 'Fast alles richtig – du hast ein echtes Gespür für Sprachen. Mit Spanisch wirst du in kurzer Zeit weit kommen. Wir freuen uns auf dich im Kurs!';
+    } else if (correct >= 5) {
+      emoji = '🌟'; title = '¡Muy bien! Richtig stark!';
+      text = 'Du weißt schon einiges über Spanisch und die spanischsprachige Welt. Stell dir vor was du nach einem Jahr Unterricht alles kannst!';
+    } else if (correct >= 3) {
+      emoji = '😊'; title = 'Gut gestartet!';
+      text = 'Du hast viel Neues gelernt – genau dafür ist dieses Quiz da. Im Spanischkurs wirst du schnell merken: diese Sprache macht Spaß!';
+    } else {
+      emoji = '🚀'; title = 'Ab jetzt geht\'s steil bergauf!';
+      text = 'Noch nicht so viel gewusst? Perfekt – denn das bedeutet, dass im Spanischkurs jede Stunde etwas Neues wartet. Die besten Abenteuer beginnen bei null!';
+    }
+
+    document.getElementById('result-emoji').textContent = emoji;
+    document.getElementById('result-title').textContent = title;
+    document.getElementById('result-text').textContent = text;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function restart() {
+    correct = 0;
+    answered = {};
+    document.getElementById('result').classList.remove('active');
+    for (let i = 1; i <= TOTAL; i++) {
+      const card = document.getElementById('q' + i);
+      card.classList.remove('active');
+      card.querySelectorAll('.option-btn').forEach(b => {
+        b.disabled = false;
+        b.classList.remove('correct','wrong','reveal-correct');
+      });
+      const fb = document.getElementById('fb-q' + i);
+      fb.classList.remove('visible','correct-fb','wrong-fb');
+      document.getElementById('next-q' + i)?.classList.remove('visible');
+    }
+    document.getElementById('q1').classList.add('active');
+    document.getElementById('progress').style.width = '0%';
+    document.getElementById('prog-label').textContent = '1 / ' + TOTAL;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  updateProgress();
+</script>
+
+</body>
+</html>
