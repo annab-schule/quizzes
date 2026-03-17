@@ -34,10 +34,7 @@ line-height: 1.1;
 letter-spacing: -0.02em;
 }
 
-h1 em {
-font-style: italic;
-font-weight: 400;
-}
+h1 em { font-style: italic; font-weight: 400; }
 
 .header-meta {
 font-size: 0.85rem;
@@ -87,10 +84,7 @@ border-radius: 100px;
 margin-left: auto;
 }
 
-.section-line {
-height: 1.5px;
-margin-bottom: 1.2rem;
-}
+.section-line { height: 1.5px; margin-bottom: 1.2rem; }
 
 .english .section-label  { color: #2d5a3d; }
 .english .section-tag    { background: #e8f0eb; color: #2d5a3d; }
@@ -168,9 +162,19 @@ transform: translateX(-4px);
 transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
-.quiz-card:hover .quiz-arrow {
-opacity: 1;
-transform: translateX(0);
+.quiz-card:hover .quiz-arrow { opacity: 1; transform: translateX(0); }
+
+/* Skeleton loader */
+.skeleton {
+background: #ece6da;
+border-radius: 14px;
+height: 110px;
+animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+0%, 100% { opacity: 1; }
+50%       { opacity: 0.5; }
 }
 
 .empty-card {
@@ -190,6 +194,18 @@ min-height: 110px;
 
 .empty-icon { font-size: 1.4rem; opacity: 0.35; }
 .empty-text { font-size: 0.8rem; }
+
+/* Error banner */
+.error-banner {
+background: #fff3cd;
+border: 1px solid #f0c040;
+border-radius: 10px;
+padding: 0.8rem 1.2rem;
+font-size: 0.82rem;
+color: #7a5a00;
+display: none;
+margin-bottom: 1rem;
+}
 
 footer {
 max-width: 900px;
@@ -218,55 +234,51 @@ header { flex-direction: column; align-items: flex-start; }
     <h1>Quiz-<em>Sammlung</em></h1>
   </div>
   <div class="header-meta">
-    <span class="quiz-count" id="total-count">0</span>
+    <span class="quiz-count" id="total-count">–</span>
     Quizzes verfügbar
   </div>
 </header>
 
 <main>
+  <div class="error-banner" id="error-banner">
+    Quizzes konnten nicht geladen werden – bitte Seite neu laden.
+  </div>
 
   <section class="english">
     <div class="section-header">
       <span class="section-label">Englisch</span>
-      <span class="section-tag" id="count-english">0 Quizzes</span>
+      <span class="section-tag" id="count-english">...</span>
     </div>
     <div class="section-line"></div>
     <div class="quiz-grid" id="grid-english">
-      <div class="empty-card">
-        <span class="empty-icon">+</span>
-        <span class="empty-text">Noch keine Quizzes</span>
-      </div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
     </div>
   </section>
 
   <section class="spanish">
     <div class="section-header">
       <span class="section-label">Spanisch</span>
-      <span class="section-tag" id="count-spanish">0 Quizzes</span>
+      <span class="section-tag" id="count-spanish">...</span>
     </div>
     <div class="section-line"></div>
     <div class="quiz-grid" id="grid-spanish">
-      <div class="empty-card">
-        <span class="empty-icon">+</span>
-        <span class="empty-text">Noch keine Quizzes</span>
-      </div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
     </div>
   </section>
 
   <section class="misc">
     <div class="section-header">
       <span class="section-label">Sonstiges</span>
-      <span class="section-tag" id="count-misc">0 Quizzes</span>
+      <span class="section-tag" id="count-misc">...</span>
     </div>
     <div class="section-line"></div>
     <div class="quiz-grid" id="grid-misc">
-      <div class="empty-card">
-        <span class="empty-icon">+</span>
-        <span class="empty-text">Noch keine Quizzes</span>
-      </div>
+      <div class="skeleton"></div>
+      <div class="skeleton"></div>
     </div>
   </section>
-
 </main>
 
 <footer>
@@ -275,37 +287,115 @@ header { flex-direction: column; align-items: flex-start; }
 </footer>
 
 <script>
-  // ─────────────────────────────────────────────────────────────
-  // QUIZZES – Claude trägt neue Einträge hier ein
-  // { title, meta, file, section: "english" | "spanish" | "misc" }
-  // ─────────────────────────────────────────────────────────────
-  const quizzes = [
-    // { title: "Present Perfect", meta: "Klasse 7 · Grammatik", file: "englisch/present-perfect.html", section: "english" },
-    // { title: "Animales", meta: "Klasse 6 · Vokabeln", file: "spanisch/animales.html", section: "spanish" },
-    // { title: "Allgemeinwissen", meta: "Vertretungsstunde", file: "sonstiges/allgemeinwissen.html", section: "misc" },
+  // ── Konfiguration ──────────────────────────────────────────
+  const GITHUB_USER = 'annab-schule';
+  const GITHUB_REPO = 'quizzes';
+  const SECTIONS = [
+    { key: 'english', folder: 'englisch',  label: 'Englisch' },
+    { key: 'spanish', folder: 'spanisch',  label: 'Spanisch' },
+    { key: 'misc',    folder: 'sonstiges', label: 'Sonstiges' },
   ];
-  // ─────────────────────────────────────────────────────────────
+  // ──────────────────────────────────────────────────────────
 
-  (function() {
-    const sections = { english: [], spanish: [], misc: [] };
-    quizzes.forEach(q => { if (sections[q.section]) sections[q.section].push(q); });
-    let total = 0;
-    for (const [key, items] of Object.entries(sections)) {
-      document.getElementById('count-' + key).textContent =
-        items.length + (items.length === 1 ? ' Quiz' : ' Quizzes');
-      total += items.length;
-      if (!items.length) continue;
-      document.getElementById('grid-' + key).innerHTML = items.map(q => `
-        <a class="quiz-card" href="${q.file}">
+  const API = `https://api.github.com/repos/${GITHUB_USER}/${GITHUB_REPO}/contents`;
+
+  // Liest den <title>-Tag einer HTML-Datei aus dem Raw-Inhalt
+  function extractMeta(html, filename) {
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    const title = titleMatch
+      ? titleMatch[1].trim()
+      : filename.replace('.html', '').replace(/-/g, ' ');
+
+    // Optionales <meta name="quiz-meta" content="..."> für Klasse/Thema
+    const metaMatch = html.match(/<meta\s+name=["']quiz-meta["']\s+content=["']([^"']+)["']/i);
+    const meta = metaMatch ? metaMatch[1] : '';
+
+    return { title, meta };
+  }
+
+  async function loadSection(section) {
+    const { key, folder } = section;
+    const grid = document.getElementById('grid-' + key);
+    const countEl = document.getElementById('count-' + key);
+
+    try {
+      const res = await fetch(`${API}/${folder}`);
+
+      // Ordner existiert noch nicht → leer anzeigen
+      if (res.status === 404) {
+        renderEmpty(grid, countEl);
+        return 0;
+      }
+
+      if (!res.ok) throw new Error('API error ' + res.status);
+
+      const files = await res.json();
+      const htmlFiles = files.filter(f => f.name.endsWith('.html') && f.type === 'file');
+
+      if (htmlFiles.length === 0) {
+        renderEmpty(grid, countEl);
+        return 0;
+      }
+
+      // Alle Dateien parallel laden um Titel + Meta zu lesen
+      const quizzes = await Promise.all(htmlFiles.map(async file => {
+        try {
+          const raw = await fetch(file.download_url);
+          const html = await raw.text();
+          const { title, meta } = extractMeta(html, file.name);
+          return { title, meta, path: `${folder}/${file.name}` };
+        } catch {
+          return {
+            title: file.name.replace('.html','').replace(/-/g,' '),
+            meta: '',
+            path: `${folder}/${file.name}`
+          };
+        }
+      }));
+
+      // Karten rendern
+      grid.innerHTML = quizzes.map(q => `
+        <a class="quiz-card" href="${q.path}">
           <span class="quiz-title">${q.title}</span>
-          <span class="quiz-meta">${q.meta}</span>
+          ${q.meta ? `<span class="quiz-meta">${q.meta}</span>` : ''}
           <span class="quiz-arrow">Quiz starten →</span>
-        </a>`).join('');
+        </a>
+      `).join('');
+
+      countEl.textContent = quizzes.length + (quizzes.length === 1 ? ' Quiz' : ' Quizzes');
+      return quizzes.length;
+
+    } catch (err) {
+      console.error('Fehler beim Laden von', folder, err);
+      renderEmpty(grid, countEl);
+      return 0;
     }
-    document.getElementById('total-count').textContent = total;
+  }
+
+  function renderEmpty(grid, countEl) {
+    grid.innerHTML = `
+      <div class="empty-card">
+        <span class="empty-icon">+</span>
+        <span class="empty-text">Noch keine Quizzes</span>
+      </div>`;
+    countEl.textContent = '0 Quizzes';
+  }
+
+  async function init() {
+    try {
+      const counts = await Promise.all(SECTIONS.map(loadSection));
+      const total = counts.reduce((a, b) => a + b, 0);
+      document.getElementById('total-count').textContent = total;
+    } catch {
+      document.getElementById('error-banner').style.display = 'block';
+      document.getElementById('total-count').textContent = '?';
+    }
+
     document.getElementById('footer-date').textContent =
       'Stand: ' + new Date().toLocaleDateString('de-DE', { month: 'long', year: 'numeric' });
-  })();
+  }
+
+  init();
 </script>
 
 </body>
