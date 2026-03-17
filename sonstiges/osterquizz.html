@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="quiz-meta" content="Osterquiz · 2. Klasse Grundschule">
+  <title>🐣 Osterquiz – 2. Klasse</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+body {
+  background: #f5f0e8;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Floating Easter eggs background */
+.bg-eggs {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  overflow: hidden;
+}
+.bg-egg {
+  position: absolute;
+  font-size: 2rem;
+  opacity: 0.13;
+  animation: floatEgg linear infinite;
+}
+
+@keyframes floatEgg {
+  0%   { transform: translateY(110vh) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.13; }
+  90%  { opacity: 0.13; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+
+/* QR Button */
+#qr-btn {
+  position: fixed;
+  top: 14px; right: 14px;
+  z-index: 200;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 46px; height: 46px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  box-shadow: 0 3px 12px rgba(30,58,95,0.35);
+  transition: transform 0.18s, background 0.18s;
+  display: flex; align-items: center; justify-content: center;
+}
+#qr-btn:hover { background: #e8732a; transform: scale(1.1); }
+
+#qr-modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(30,58,95,0.55);
+  z-index: 300;
+  align-items: center;
+  justify-content: center;
+}
+#qr-modal.open { display: flex; }
+#qr-box {
+  background: #fff;
+  border-radius: 18px;
+  padding: 28px 32px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(30,58,95,0.25);
+  max-width: 280px;
+}
+#qr-box h3 {
+  font-family: Georgia, 'Palatino Linotype', serif;
+  color: #1e3a5f;
+  margin-bottom: 14px;
+  font-size: 1.05rem;
+}
+#qr-close {
+  margin-top: 16px;
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 22px;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+/* Main layout */
+.wrapper {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 32px 18px 60px;
+}
+
+/* Header */
+.header {
+  text-align: center;
+  margin-bottom: 36px;
+}
+.header .big-egg {
+  font-size: 4rem;
+  display: block;
+  margin-bottom: 6px;
+  animation: bounce 1.8s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.header h1 {
+  font-family: Georgia, 'Palatino Linotype', serif;
+  font-size: 2.3rem;
+  color: #1e3a5f;
+  line-height: 1.15;
+}
+.header p {
+  color: #7a6a55;
+  font-size: 1.05rem;
+  margin-top: 8px;
+}
+
+/* Progress bar */
+.progress-wrap {
+  margin-bottom: 28px;
+}
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.88rem;
+  color: #7a6a55;
+  margin-bottom: 6px;
+}
+.progress-bar-outer {
+  height: 10px;
+  background: #e0d8cc;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress-bar-inner {
+  height: 100%;
+  background: linear-gradient(90deg, #e8732a, #f0a83c);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(.4,0,.2,1);
+}
+
+/* Question card */
+.card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 32px 28px 28px;
+  box-shadow: 0 4px 24px rgba(30,58,95,0.10);
+  animation: slideIn 0.35s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.question-emoji {
+  font-size: 2.4rem;
+  display: block;
+  margin-bottom: 10px;
+}
+.question-text {
+  font-family: Georgia, 'Palatino Linotype', serif;
+  font-size: 1.35rem;
+  color: #1e3a5f;
+  line-height: 1.45;
+  margin-bottom: 22px;
+}
+
+/* Answer buttons */
+.answers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 440px) {
+  .answers { grid-template-columns: 1fr; }
+}
+
+.ans-btn {
+  background: #f5f0e8;
+  border: 2.5px solid #e0d8cc;
+  border-radius: 14px;
+  padding: 14px 12px;
+  font-size: 1rem;
+  color: #1e3a5f;
+  cursor: pointer;
+  text-align: left;
+  line-height: 1.35;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+}
+.ans-btn:hover:not(:disabled) {
+  background: #ede6d8;
+  border-color: #e8732a;
+  transform: translateY(-2px);
+}
+.ans-btn.correct {
+  background: #d4f0dc;
+  border-color: #3db868;
+  color: #1a5c31;
+}
+.ans-btn.wrong {
+  background: #fde8e8;
+  border-color: #e84040;
+  color: #7a1f1f;
+}
+.ans-btn:disabled { cursor: default; }
+
+/* Feedback */
+.feedback {
+  margin-top: 18px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  display: none;
+}
+.feedback.show { display: block; }
+.feedback.correct-fb { background: #d4f0dc; color: #1a5c31; }
+.feedback.wrong-fb   { background: #fde8e8; color: #7a1f1f; }
+
+/* Next button */
+.next-wrap { text-align: right; margin-top: 20px; }
+.next-btn {
+  background: #1e3a5f;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 30px;
+  font-size: 1rem;
+  cursor: pointer;
+  display: none;
+  transition: background 0.15s, transform 0.12s;
+}
+.next-btn:hover { background: #e8732a; transform: translateY(-2px); }
+.next-btn.show { display: inline-block; }
+
+/* Result screen */
+#result-screen {
+  display: none;
+  text-align: center;
+}
+#result-screen.show { display: block; }
+
+.result-big {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 12px;
+  animation: pop 0.5s cubic-bezier(.4,0,.2,1);
+}
+@keyframes pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.result-title {
+  font-family: Georgia, 'Palatino Linotype', serif;
+  font-size: 2rem;
+  color: #1e3a5f;
+  margin-bottom: 10px;
+}
+.result-score {
+  font-size: 1.2rem;
+  color: #7a6a55;
+  margin-bottom: 22px;
+}
+.result-msg {
+  background: #fff;
+  border-radius: 16px;
+  padding: 20px 24px;
+  font-size: 1.05rem;
+  color: #1e3a5f;
+  box-shadow: 0 4px 18px rgba(30,58,95,0.10);
+  margin-bottom: 24px;
+  line-height: 1.6;
+}
+.restart-btn {
+  background: #e8732a;
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  padding: 14px 36px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.12s;
+}
+.restart-btn:hover { background: #c95e1a; transform: translateY(-2px); }
+
+/* Confetti canvas */
+#confetti-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 100;
+}
+```
+
+  </style>
+</head>
+<body>
+
+<!-- Background floating eggs -->
+
+<div class="bg-eggs" id="bgEggs"></div>
+
+<!-- Confetti -->
+
+<canvas id="confetti-canvas"></canvas>
+
+<!-- QR Button -->
+
+<button id="qr-btn" title="QR-Code anzeigen">⊞</button>
+
+<div id="qr-modal">
+  <div id="qr-box">
+    <h3>Quiz aufrufen</h3>
+    <div id="qr-code"></div>
+    <button id="qr-close">Schließen</button>
+  </div>
+</div>
+
+<div class="wrapper">
+  <div class="header">
+    <span class="big-egg">🐣</span>
+    <h1>Oster-Quiz</h1>
+    <p>Wie viel weißt du über Ostern?</p>
+  </div>
+
+  <!-- Quiz screen -->
+
+  <div id="quiz-screen">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="progress-text">Frage 1 von 8</span>
+        <span id="score-text">⭐ 0 richtig</span>
+      </div>
+      <div class="progress-bar-outer">
+        <div class="progress-bar-inner" id="progress-bar" style="width:12.5%"></div>
+      </div>
+    </div>
+
+```
+<div class="card" id="question-card">
+  <span class="question-emoji" id="q-emoji"></span>
+  <p class="question-text" id="q-text"></p>
+  <div class="answers" id="answers"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="next-wrap">
+    <button class="next-btn" id="next-btn">Weiter →</button>
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- Result screen -->
+
+  <div id="result-screen">
+    <span class="result-big" id="result-emoji"></span>
+    <h2 class="result-title" id="result-title"></h2>
+    <p class="result-score" id="result-score"></p>
+    <div class="result-msg" id="result-msg"></div>
+    <button class="restart-btn" onclick="restart()">🔄 Nochmal spielen</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    emoji: "🐇",
+    text: "Wer versteckt an Ostern die Eier?",
+    answers: ["Der Weihnachtsmann", "Der Osterhase", "Die Osterkatze", "Der Osterfuchs"],
+    correct: 1,
+    feedback: "Genau! Der Osterhase versteckt die bunten Eier. 🐰"
+  },
+  {
+    emoji: "🥚",
+    text: "Welche Farbe haben echte Hühnereier meistens?",
+    answers: ["Blau", "Rot", "Weiß oder braun", "Grün"],
+    correct: 2,
+    feedback: "Richtig! Echte Hühnereier sind meistens weiß oder braun. 🥚"
+  },
+  {
+    emoji: "🌸",
+    text: "In welchem Monat ist Ostern meist?",
+    answers: ["Januar", "Dezember", "März oder April", "August"],
+    correct: 2,
+    feedback: "Super! Ostern ist immer im März oder April. 🌷"
+  },
+  {
+    emoji: "✝️",
+    text: "Was feiern Christen an Ostern?",
+    answers: ["Die Geburt von Jesus", "Dass Jesus auferstanden ist", "Das neue Jahr", "Das Ende des Winters"],
+    correct: 1,
+    feedback: "Sehr gut! Christen feiern die Auferstehung von Jesus. ✨"
+  },
+  {
+    emoji: "🍫",
+    text: "Woraus bestehen viele Ostergeschenke?",
+    answers: ["Aus Wolle", "Aus Schokolade", "Aus Papier", "Aus Holz"],
+    correct: 1,
+    feedback: "Lecker! Schokoladenhasen und -eier sind sehr beliebt! 🍫"
+  },
+  {
+    emoji: "🌿",
+    text: "Was steckt man in Deutschland oft in Körbe für den Osterhasen?",
+    answers: ["Sand und Steine", "Gras oder Heu", "Wasser", "Erde"],
+    correct: 1,
+    feedback: "Richtig! In den Osterkorb kommt grünes Gras oder Heu. 🌾"
+  },
+  {
+    emoji: "📅",
+    text: "Wie heißt der Sonntag vor Ostern?",
+    answers: ["Karfreitag", "Pfingstsonntag", "Palmsonntag", "Aschermittwoch"],
+    correct: 2,
+    feedback: "Klasse! Den Sonntag vor Ostern nennt man Palmsonntag. 🌴"
+  },
+  {
+    emoji: "🔔",
+    text: "Was passiert laut einer Legende in der Nacht vor Ostern mit den Kirchenglocken?",
+    answers: ["Sie schmelzen", "Sie fliegen nach Rom", "Sie werden bunt bemalt", "Sie verschwinden"],
+    correct: 1,
+    feedback: "Toll! In der Legende fliegen die Glocken nach Rom und bringen die Ostereier mit. 🔔"
+  }
+];
+
+let current = 0, score = 0, answered = false;
+
+function loadQuestion() {
+  const q = questions[current];
+  document.getElementById('q-emoji').textContent = q.emoji;
+  document.getElementById('q-text').textContent = q.text;
+  document.getElementById('progress-text').textContent = `Frage ${current+1} von ${questions.length}`;
+  document.getElementById('score-text').textContent = `⭐ ${score} richtig`;
+  document.getElementById('progress-bar').style.width = `${((current+1)/questions.length)*100}%`;
+
+  const aContainer = document.getElementById('answers');
+  aContainer.innerHTML = '';
+  q.answers.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'ans-btn';
+    btn.textContent = a;
+    btn.onclick = () => selectAnswer(i);
+    aContainer.appendChild(btn);
+  });
+
+  const fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.textContent = '';
+  document.getElementById('next-btn').className = 'next-btn';
+  answered = false;
+
+  // re-animate card
+  const card = document.getElementById('question-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = '';
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const btns = document.querySelectorAll('.ans-btn');
+  btns.forEach(b => b.disabled = true);
+
+  const fb = document.getElementById('feedback');
+
+  if (idx === q.correct) {
+    score++;
+    btns[idx].classList.add('correct');
+    fb.className = 'feedback correct-fb show';
+    fb.textContent = '✅ ' + q.feedback;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback wrong-fb show';
+    fb.textContent = '❌ Fast! ' + q.feedback;
+  }
+  document.getElementById('score-text').textContent = `⭐ ${score} richtig`;
+  document.getElementById('next-btn').className = 'next-btn show';
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) {
+    loadQuestion();
+  } else {
+    showResult();
+  }
+};
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.className = 'show';
+
+  const pct = score / questions.length;
+  let emoji, title, msg;
+
+  if (pct === 1) {
+    emoji = '🏆'; title = 'Perfekt!';
+    msg = `Wow, alle ${questions.length} Fragen richtig! Du bist ein echter Oster-Profi! 🐣✨`;
+    launchConfetti();
+  } else if (pct >= 0.75) {
+    emoji = '🌟'; title = 'Super gemacht!';
+    msg = `${score} von ${questions.length} richtig – das ist toll! Du weißt schon sehr viel über Ostern. 🐰`;
+    launchConfetti();
+  } else if (pct >= 0.5) {
+    emoji = '🌷'; title = 'Gut versucht!';
+    msg = `${score} von ${questions.length} richtig. Beim nächsten Mal schaffst du noch mehr! 💪`;
+  } else {
+    emoji = '🐣'; title = 'Weiter üben!';
+    msg = `${score} von ${questions.length} richtig. Ostern kommt bald – dann kannst du noch mehr lernen! 🌸`;
+  }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score').textContent = `${score} von ${questions.length} Fragen richtig`;
+  document.getElementById('result-msg').textContent = msg;
+}
+
+function restart() {
+  current = 0; score = 0;
+  document.getElementById('result-screen').className = '';
+  document.getElementById('quiz-screen').style.display = '';
+  loadQuestion();
+}
+
+// Background eggs
+const eggChars = ['🥚','🐣','🐰','🌸','🌷','🌼','🌺'];
+const bgEggs = document.getElementById('bgEggs');
+for (let i = 0; i < 18; i++) {
+  const span = document.createElement('span');
+  span.className = 'bg-egg';
+  span.textContent = eggChars[Math.floor(Math.random() * eggChars.length)];
+  span.style.left = Math.random() * 100 + 'vw';
+  span.style.fontSize = (1.2 + Math.random() * 2) + 'rem';
+  const dur = 12 + Math.random() * 14;
+  span.style.animationDuration = dur + 's';
+  span.style.animationDelay = (-Math.random() * dur) + 's';
+  bgEggs.appendChild(span);
+}
+
+// QR Code
+document.getElementById('qr-btn').onclick = () => {
+  const modal = document.getElementById('qr-modal');
+  modal.classList.add('open');
+  const box = document.getElementById('qr-code');
+  if (!box.firstChild) {
+    new QRCode(box, { text: window.location.href, width: 180, height: 180, colorDark: '#1e3a5f', colorLight: '#fff' });
+  }
+};
+document.getElementById('qr-close').onclick = () => document.getElementById('qr-modal').classList.remove('open');
+document.getElementById('qr-modal').onclick = (e) => { if (e.target === document.getElementById('qr-modal')) document.getElementById('qr-modal').classList.remove('open'); };
+
+// Confetti
+function launchConfetti() {
+  const canvas = document.getElementById('confetti-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const colors = ['#e8732a','#f0a83c','#3db868','#e84040','#5b9bd5','#f5c842','#e87dbf'];
+  const pieces = Array.from({length: 120}, () => ({
+    x: Math.random() * canvas.width,
+    y: -20 - Math.random() * 200,
+    w: 8 + Math.random() * 10,
+    h: 6 + Math.random() * 8,
+    color: colors[Math.floor(Math.random() * colors.length)],
+    vy: 3 + Math.random() * 4,
+    vx: -2 + Math.random() * 4,
+    rot: Math.random() * 360,
+    rots: -3 + Math.random() * 6
+  }));
+
+  let frame;
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    pieces.forEach(p => {
+      p.y += p.vy; p.x += p.vx; p.rot += p.rots;
+      if (p.y < canvas.height + 20) alive = true;
+      ctx.save();
+      ctx.translate(p.x + p.w/2, p.y + p.h/2);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    });
+    if (alive) frame = requestAnimationFrame(draw);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+  }
+  cancelAnimationFrame(frame);
+  draw();
+}
+
+loadQuestion();
+</script>
+
+</body>
+</html>
