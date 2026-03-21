@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="quiz-meta" content="Zuckerwatte-Kalkulation · SMV">
+  <title>SMV Zuckerwatte-Kalkulation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+body {
+  background: #f5f0e8;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  color: #1e3a5f;
+  min-height: 100vh;
+  padding: 2rem 1rem 4rem;
+}
+
+.page { max-width: 680px; margin: 0 auto; }
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 2rem 1.5rem 1.5rem;
+  background: #1e3a5f;
+  border-radius: 18px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.header::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 160px; height: 160px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 50%;
+}
+.header::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: -30px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.04);
+  border-radius: 50%;
+}
+.emoji { font-size: 3.5rem; display: block; margin-bottom: 0.5rem; }
+.title {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+  line-height: 1.2;
+}
+.subtitle {
+  font-size: 0.9rem;
+  color: rgba(255,255,255,0.7);
+  margin-top: 0.4rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+.badge {
+  display: inline-block;
+  margin-top: 1rem;
+  background: #ff9f43;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 0.35rem 1.2rem;
+  border-radius: 99px;
+}
+.badge2 {
+  display: inline-block;
+  margin-top: 0.5rem;
+  margin-left: 0.4rem;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.25rem 0.9rem;
+  border-radius: 99px;
+}
+
+.strip {
+  height: 5px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #ff6fb0, #ffb347, #c879ff, #ff6fb0);
+  background-size: 200%;
+  animation: shimmer 4s linear infinite;
+  margin: 1.5rem 0;
+}
+@keyframes shimmer { 0%{background-position:0%} 100%{background-position:200%} }
+
+.section-title {
+  font-family: Georgia, serif;
+  font-size: 1.05rem;
+  font-weight: bold;
+  color: #1e3a5f;
+  margin: 1.5rem 0 0.6rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.erfahrung-badge {
+  font-size: 0.72rem;
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 0.15rem 0.6rem;
+  border-radius: 99px;
+  font-family: -apple-system, sans-serif;
+  font-weight: 600;
+}
+
+.card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.2rem 1.4rem;
+  box-shadow: 0 2px 12px rgba(30,58,95,0.07);
+}
+
+.cost-table { width: 100%; border-collapse: collapse; }
+.cost-table tr { border-bottom: 1px solid #f0ebe0; }
+.cost-table tr:last-child { border-bottom: none; }
+.cost-table td { padding: 0.55rem 0.3rem; font-size: 0.95rem; }
+.cost-table td:last-child { text-align: right; font-weight: 600; color: #1e3a5f; }
+.cost-table .total-row td {
+  font-weight: 700;
+  font-size: 1rem;
+  color: #1e3a5f;
+  border-top: 2px solid #1e3a5f;
+  padding-top: 0.7rem;
+}
+.cost-table .abschr-row td { color: #888; font-style: italic; }
+.cost-table .abschr-row td:last-child { color: #888; }
+.cost-table .sub { font-size: 0.78rem; color: #888; display: block; margin-top: 1px; }
+
+.three-highlights {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.7rem;
+  margin: 0.8rem 0;
+}
+.two-highlights {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin: 0.8rem 0;
+}
+.highlight-box {
+  background: #1e3a5f;
+  color: white;
+  border-radius: 14px;
+  padding: 1.1rem 1rem;
+  text-align: center;
+}
+.highlight-box.green { background: #2e7d32; }
+.highlight-box.orange { background: #e65100; }
+.highlight-big {
+  font-size: 1.8rem;
+  font-weight: 800;
+  line-height: 1;
+  color: #ff9f43;
+}
+.highlight-label { font-size: 0.78rem; opacity: 0.85; line-height: 1.5; margin-top: 0.3rem; }
+
+.price-table { width: 100%; border-collapse: collapse; }
+.price-table th {
+  background: #eee8d8;
+  color: #1e3a5f;
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 0.5rem 0.6rem;
+  text-align: left;
+}
+.price-table th:not(:first-child) { text-align: right; }
+.price-table td { padding: 0.6rem 0.6rem; font-size: 0.93rem; border-bottom: 1px solid #f0ebe0; }
+.price-table td:not(:first-child) { text-align: right; }
+.price-table tr:last-child td { border-bottom: none; }
+.price-table .winner { background: #fff8ee; font-weight: 700; }
+.price-table .winner td:first-child::after { content: ' ⭐'; }
+
+.time-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+.time-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(30,58,95,0.07);
+}
+.time-num { font-size: 1.8rem; font-weight: 800; color: #ff9f43; line-height: 1; }
+.time-label { font-size: 0.8rem; color: #666; margin-top: 0.3rem; }
+
+.event-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+.event-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.1rem;
+  box-shadow: 0 2px 8px rgba(30,58,95,0.07);
+  text-align: center;
+}
+.event-card.second { background: #1e3a5f; color: white; }
+.event-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.7; margin-bottom: 0.4rem; }
+.event-num { font-size: 2rem; font-weight: 800; color: #ff9f43; line-height: 1; }
+.event-detail { font-size: 0.78rem; opacity: 0.75; margin-top: 0.4rem; line-height: 1.6; }
+
+.tipp-box {
+  background: #fff8ee;
+  border-left: 4px solid #ff9f43;
+  border-radius: 0 12px 12px 0;
+  padding: 1rem 1.2rem;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #1e3a5f;
+  margin: 1rem 0;
+}
+
+.lager-box {
+  background: #e8f5e9;
+  border-left: 4px solid #43a047;
+  border-radius: 0 12px 12px 0;
+  padding: 1rem 1.2rem;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: #1b5e20;
+  margin: 1rem 0;
+}
+
+.footer {
+  text-align: center;
+  font-size: 0.78rem;
+  color: #aaa;
+  margin-top: 2rem;
+}
+
+@media print {
+  body { padding: 0.5rem; background: white; }
+  .strip, .header, .highlight-box, .price-table th, .event-card.second {
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
+```
+
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <span class="emoji">🍭</span>
+    <div class="title">Zuckerwatte-Stand</div>
+    <div class="subtitle">SMV-Kalkulation · Schulparty</div>
+    <div class="badge">Verkaufspreis: 2,00 €</div>
+    <div class="badge2">✓ Echte Zahlen · 1. Event 20.03.2026</div>
+  </div>
+
+  <!-- STARTKOSTEN -->
+
+  <p class="section-title">💰 Startkosten (einmalig)</p>
+  <div class="card">
+    <table class="cost-table">
+      <tr>
+        <td>🍢 Holzstäbchen (520 Stück)
+          <span class="sub">3 Pakete · tatsächlicher Einkauf</span>
+        </td>
+        <td>26,46 €</td>
+      </tr>
+      <tr>
+        <td>🍬 Farbzucker (3 Packungen)
+          <span class="sub">tatsächlicher Einkauf · je ~1 kg / 8,68 €</span>
+        </td>
+        <td>25,43 €</td>
+      </tr>
+      <tr>
+        <td>🍚 Normaler Zucker (3 Packungen)
+          <span class="sub">tatsächlicher Einkauf · je 1 kg / 1,39 €</span>
+        </td>
+        <td>4,17 €</td>
+      </tr>
+      <tr class="total-row">
+        <td>Gesamt Startinvestition (Material)</td>
+        <td>56,06 €</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="strip"></div>
+
+  <!-- KOSTEN PRO PORTION -->
+
+  <p class="section-title">🔍 Kosten pro Portion <span class="erfahrung-badge">Erfahrungswert ✓</span></p>
+  <div class="card">
+    <table class="cost-table">
+      <tr>
+        <td>🍢 Stäbchen (inkl. ~25% Ausschuss)
+          <span class="sub">210 Stück für 170 Portionen · 0,051 € / Stück</span>
+        </td>
+        <td>0,063 €</td>
+      </tr>
+      <tr>
+        <td>🍬 Farbzucker (~6 g / Portion, erste 50 Portionen)
+          <span class="sub">danach normaler Zucker · gemittelter Wert</span>
+        </td>
+        <td>0,051 €</td>
+      </tr>
+      <tr>
+        <td>🍚 Normaler Zucker (~14 g / Portion, ab Portion 51)
+          <span class="sub">gemittelter Wert über alle 170 Portionen</span>
+        </td>
+        <td>0,020 €</td>
+      </tr>
+      <tr class="abschr-row">
+        <td>⚙️ Maschinenabschreibung (anteilig)
+          <span class="sub">250 € ÷ 15 Events (5 Jahre) = 16,67 € / Event ÷ 170 Portionen</span>
+        </td>
+        <td>0,098 €</td>
+      </tr>
+      <tr class="total-row">
+        <td>Vollkosten pro Portion</td>
+        <td>0,232 €</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="three-highlights">
+    <div class="highlight-box">
+      <div class="highlight-big">0,13 €</div>
+      <div class="highlight-label">Wareneinsatz<br>pro Portion</div>
+    </div>
+    <div class="highlight-box orange">
+      <div class="highlight-big">0,10 €</div>
+      <div class="highlight-label">Abschreibung<br>pro Portion</div>
+    </div>
+    <div class="highlight-box green">
+      <div class="highlight-big">1,77 €</div>
+      <div class="highlight-label">Deckungsbeitrag<br>(nach Vollkosten)</div>
+    </div>
+  </div>
+
+  <div class="lager-box">
+    📦 <strong>Lagerbestand nach 1. Event:</strong> noch 310 Stäbchen (~15,81 €) · noch 2 Packungen Farbzucker (~17,36 €) → Startmaterial für Event 2 bereits vorhanden!
+  </div>
+
+  <div class="strip"></div>
+
+  <!-- ZEITPLANUNG -->
+
+  <p class="section-title">⏱️ Zeitplanung · 1 Person</p>
+  <div class="time-grid">
+    <div class="time-card">
+      <div class="time-num">30 Sek</div>
+      <div class="time-label">pro Zuckerwatte</div>
+    </div>
+    <div class="time-card">
+      <div class="time-num">120</div>
+      <div class="time-label">Portionen / Stunde möglich</div>
+    </div>
+    <div class="time-card">
+      <div class="time-num">~85 Min</div>
+      <div class="time-label">für 170 Portionen</div>
+    </div>
+    <div class="time-card">
+      <div class="time-num">170</div>
+      <div class="time-label">Portionen / Event (Erfahrungswert ✓)</div>
+    </div>
+  </div>
+
+  <div class="strip"></div>
+
+  <!-- PREISVERGLEICH -->
+
+  <p class="section-title">📊 Ergebnisübersicht · 170 Portionen</p>
+  <div class="card">
+    <table class="price-table">
+      <thead>
+        <tr>
+          <th>Preis</th>
+          <th>Einnahmen</th>
+          <th>Wareneinsatz</th>
+          <th>Abschreibung</th>
+          <th>Gewinn</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>1,50 €</td>
+          <td>255,00 €</td>
+          <td>22,73 €</td>
+          <td>16,67 €</td>
+          <td>+215,60 €</td>
+        </tr>
+        <tr class="winner">
+          <td>2,00 €</td>
+          <td>340,00 €</td>
+          <td>22,73 €</td>
+          <td>16,67 €</td>
+          <td>+300,60 €</td>
+        </tr>
+        <tr>
+          <td>2,50 €</td>
+          <td>425,00 €</td>
+          <td>22,73 €</td>
+          <td>16,67 €</td>
+          <td>+385,60 €</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:0.78rem;color:#999;margin-top:0.4rem;padding-left:0.3rem;">* Abschreibung: 250 € ÷ 15 Events (5 Jahre · 3 Events/Jahr)</p>
+
+  <div class="strip"></div>
+
+  <!-- EVENT VERGLEICH -->
+
+  <p class="section-title">🎉 1. vs. 2. Event</p>
+  <div class="event-grid">
+    <div class="event-card">
+      <div class="event-title">1. Event (tatsächlich)</div>
+      <div class="event-num" style="color:#2e7d32;">+267 €</div>
+      <div class="event-detail" style="color:#555;">
+        Einnahmen: 340,00 €<br>
+        Wareneinsatz: 22,73 €<br>
+        Restl. Startmaterial: 33,33 €<br>
+        Abschreibung: 16,67 €<br>
+        <span style="font-size:0.72rem;color:#43a047;">Sofort im Plus! ✓</span>
+      </div>
+    </div>
+    <div class="event-card second">
+      <div class="event-title">Ab 2. Event</div>
+      <div class="event-num">+301 €</div>
+      <div class="event-detail">
+        Einnahmen: 340,00 €<br>
+        Wareneinsatz: ~23 €<br>
+        Abschreibung: 16,67 €<br>
+        <span style="font-size:0.72rem;color:#ff9f43;">Stäbchen + Farbzucker<br>teils noch aus Lager</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tipp-box">
+    💡 <strong>SMV-Tipp:</strong> Schon das erste Event bringt <strong>+267 € Gewinn</strong> – selbst nach Abschreibung! Ab dem zweiten Event sind es rund <strong>301 € pro Veranstaltung</strong>. Bei 3 Events im Jahr macht der Stand über <strong>850 € für die SMV-Kasse</strong>. 🚀
+  </div>
+
+  <!-- FOLGEKOSTEN -->
+
+  <p class="section-title">🔄 Nachkauf für 2. Event (Schätzung)</p>
+  <div class="card">
+    <table class="cost-table">
+      <tr>
+        <td>🍢 Stäbchen-Nachkauf (nur falls nötig)
+          <span class="sub">310 Stück noch im Lager – reicht für ~150 Portionen</span>
+        </td>
+        <td>~0–14 €</td>
+      </tr>
+      <tr>
+        <td>🍬 Farbzucker (2 Pkg noch vorhanden)
+          <span class="sub">reicht für ~100 Portionen Farbzucker</span>
+        </td>
+        <td>0,00 €</td>
+      </tr>
+      <tr>
+        <td>🍚 Normaler Zucker Nachkauf
+          <span class="sub">~3 kg · 3 × 1,39 €</span>
+        </td>
+        <td>~4,17 €</td>
+      </tr>
+      <tr class="total-row">
+        <td>Gesamt Nachkauf Event 2</td>
+        <td>~4–18 €</td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="strip"></div>
+
+  <div class="footer">
+    Erstellt für die SMV · Gymnasium Wendelstein · Schulparty-Kalkulation · Echte Zahlen vom 1. Event 20.03.2026
+  </div>
+
+</div>
+</body>
+</html>
