@@ -72,6 +72,7 @@ body {
 /* NAME SCREEN */
 .screen { display: none; }
 .screen.active { display: block; }
+#nameScreen { display: block; }
 
 .name-screen {
   max-width: 480px;
@@ -632,9 +633,24 @@ function startQuiz() {
   showQuestion();
 }
 
+// Enter-Taste im Namensfeld
+document.addEventListener("DOMContentLoaded", function() {
+  document.getElementById("nameInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") startQuiz();
+  });
+});
+
 function showScreen(id) {
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  document.getElementById(id).classList.add("active");
+  ["nameScreen","quizScreen","resultScreen"].forEach(function(sid) {
+    var el = document.getElementById(sid);
+    if (sid === id) {
+      el.style.display = "block";
+      el.classList.add("active");
+    } else {
+      el.style.display = "none";
+      el.classList.remove("active");
+    }
+  });
 }
 
 function updateProgress() {
