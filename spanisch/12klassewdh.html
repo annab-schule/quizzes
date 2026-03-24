@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="quiz-meta" content="Klasse 12 · Spanisch Grammatik & Wortschatz">
+  <title>Spanisch-Quiz – Klasse 12</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+```
+body {
+  background: #f0f4ff;
+  font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+  color: #1a1a2e;
+  min-height: 100vh;
+}
+
+/* TOP BAR */
+.topbar {
+  background: #2d5a9e;
+  color: white;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(45,90,158,0.3);
+}
+.topbar h1 {
+  font-family: Palatino, Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: normal;
+  letter-spacing: 0.02em;
+}
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.qr-btn {
+  background: rgba(255,255,255,0.2);
+  border: 1px solid rgba(255,255,255,0.4);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.2s;
+}
+.qr-btn:hover { background: rgba(255,255,255,0.35); }
+
+/* PROGRESS BAR */
+.progress-wrap {
+  background: #d0d9f0;
+  height: 6px;
+  width: 100%;
+}
+.progress-bar {
+  background: #2d5a9e;
+  height: 6px;
+  width: 0%;
+  transition: width 0.4s ease;
+}
+.progress-label {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #5a6a8a;
+  padding: 6px 0 0;
+}
+
+/* NAME SCREEN */
+.screen { display: none; }
+.screen.active { display: block; }
+
+.name-screen {
+  max-width: 480px;
+  margin: 60px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(45,90,158,0.1);
+  text-align: center;
+}
+.name-screen h2 {
+  font-family: Palatino, Georgia, serif;
+  font-size: 1.8rem;
+  color: #2d5a9e;
+  margin-bottom: 8px;
+}
+.name-screen p {
+  color: #5a6a8a;
+  margin-bottom: 28px;
+  font-size: 0.95rem;
+}
+.name-screen input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid #d0d9f0;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  outline: none;
+  transition: border-color 0.2s;
+  font-family: inherit;
+}
+.name-screen input:focus { border-color: #2d5a9e; }
+.start-btn {
+  margin-top: 16px;
+  width: 100%;
+  padding: 13px;
+  background: #2d5a9e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, transform 0.1s;
+}
+.start-btn:hover { background: #1e4080; transform: translateY(-1px); }
+.flag { font-size: 2.5rem; margin-bottom: 16px; }
+
+/* QUIZ SCREEN */
+.quiz-wrap {
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 24px 20px 60px;
+}
+.question-card {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  box-shadow: 0 3px 16px rgba(45,90,158,0.09);
+  margin-top: 20px;
+  animation: fadeSlide 0.35s ease;
+}
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.q-category {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #2d5a9e;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.q-text {
+  font-size: 1.1rem;
+  line-height: 1.6;
+  color: #1a1a2e;
+  margin-bottom: 22px;
+  font-family: Palatino, Georgia, serif;
+}
+.q-text em {
+  font-style: normal;
+  background: #eef2ff;
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: #2d5a9e;
+  font-weight: 600;
+}
+
+.options { display: flex; flex-direction: column; gap: 10px; }
+.option {
+  padding: 12px 16px;
+  border: 2px solid #d0d9f0;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.97rem;
+  background: #f8f9ff;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.option:hover:not(.disabled) {
+  border-color: #2d5a9e;
+  background: #eef2ff;
+  transform: translateX(3px);
+}
+.option .badge {
+  min-width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #d0d9f0;
+  color: #2d5a9e;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.option.correct { border-color: #22c55e; background: #f0fdf4; }
+.option.correct .badge { background: #22c55e; color: white; }
+.option.wrong { border-color: #ef4444; background: #fff5f5; }
+.option.wrong .badge { background: #ef4444; color: white; }
+.option.disabled { cursor: default; }
+
+.feedback {
+  margin-top: 18px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  display: none;
+}
+.feedback.show { display: block; animation: fadeSlide 0.25s ease; }
+.feedback.ok { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; }
+.feedback.nope { background: #fff5f5; border-left: 4px solid #ef4444; color: #991b1b; }
+
+.next-btn {
+  margin-top: 18px;
+  padding: 11px 28px;
+  background: #2d5a9e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 0.97rem;
+  cursor: pointer;
+  font-family: inherit;
+  display: none;
+  transition: background 0.2s;
+}
+.next-btn.show { display: inline-block; }
+.next-btn:hover { background: #1e4080; }
+
+/* RESULT SCREEN */
+.result-screen {
+  max-width: 520px;
+  margin: 50px auto;
+  padding: 40px;
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 4px 32px rgba(45,90,158,0.12);
+  text-align: center;
+}
+.result-emoji { font-size: 3.5rem; margin-bottom: 12px; }
+.result-name {
+  font-size: 1rem;
+  color: #5a6a8a;
+  margin-bottom: 4px;
+}
+.result-score {
+  font-family: Palatino, Georgia, serif;
+  font-size: 3rem;
+  color: #2d5a9e;
+  font-weight: bold;
+  line-height: 1;
+}
+.result-total { font-size: 1rem; color: #5a6a8a; margin-bottom: 16px; }
+.result-msg {
+  font-size: 1.05rem;
+  color: #1a1a2e;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+.result-bar-wrap {
+  background: #d0d9f0;
+  border-radius: 99px;
+  height: 12px;
+  margin: 0 0 28px;
+  overflow: hidden;
+}
+.result-bar {
+  background: #2d5a9e;
+  height: 12px;
+  border-radius: 99px;
+  transition: width 1s ease;
+}
+.again-btn {
+  padding: 12px 32px;
+  background: #2d5a9e;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+.again-btn:hover { background: #1e4080; }
+.sending-msg {
+  font-size: 0.82rem;
+  color: #5a6a8a;
+  margin-top: 16px;
+}
+
+/* QR MODAL */
+.qr-modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+}
+.qr-modal.open { display: flex; }
+.qr-box {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  text-align: center;
+  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+}
+.qr-box p { margin-top: 16px; font-size: 0.88rem; color: #5a6a8a; }
+.qr-close {
+  margin-top: 16px;
+  padding: 8px 24px;
+  background: #2d5a9e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+```
+
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+
+<div class="topbar">
+  <h1>🇪🇸 Spanisch-Quiz · Klasse 12</h1>
+  <div class="topbar-right">
+    <button class="qr-btn" onclick="toggleQR()" title="QR-Code anzeigen">⊞ QR</button>
+  </div>
+</div>
+
+<!-- PROGRESS -->
+
+<div class="progress-wrap">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+<div class="progress-label" id="progressLabel"></div>
+
+<!-- NAME SCREEN -->
+
+<div class="screen active" id="nameScreen">
+  <div class="name-screen">
+    <div class="flag">🇪🇸</div>
+    <h2>¡Bienvenido/a!</h2>
+    <p>Trag deinen Namen ein und starte das Quiz.<br>30 Fragen zu Grammatik und Wortschatz – Grundlagen auf dem Prüfstand!</p>
+    <input type="text" id="nameInput" placeholder="Dein Name..." maxlength="40" />
+    <button class="start-btn" onclick="startQuiz()">Los geht's →</button>
+  </div>
+</div>
+
+<!-- QUIZ SCREEN -->
+
+<div class="screen" id="quizScreen">
+  <div class="quiz-wrap">
+    <div class="question-card" id="questionCard">
+      <div class="q-category" id="qCategory"></div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="optionsWrap"></div>
+      <div class="feedback" id="feedback"></div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Weiter →</button>
+    </div>
+  </div>
+</div>
+
+<!-- RESULT SCREEN -->
+
+<div class="screen" id="resultScreen">
+  <div class="result-screen">
+    <div class="result-emoji" id="resultEmoji"></div>
+    <div class="result-name" id="resultName"></div>
+    <div class="result-score" id="resultScore"></div>
+    <div class="result-total" id="resultTotal"></div>
+    <div class="result-bar-wrap"><div class="result-bar" id="resultBar"></div></div>
+    <div class="result-msg" id="resultMsg"></div>
+    <button class="again-btn" onclick="resetQuiz()">🔄 Nochmal versuchen</button>
+    <div class="sending-msg" id="sendingMsg"></div>
+  </div>
+</div>
+
+<!-- QR MODAL -->
+
+<div class="qr-modal" id="qrModal">
+  <div class="qr-box">
+    <div id="qrcode"></div>
+    <p>Scanne den QR-Code,<br>um das Quiz zu öffnen.</p>
+    <button class="qr-close" onclick="toggleQR()">Schließen</button>
+  </div>
+</div>
+
+<script>
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbzgWj2IjKn9LjcNIB5YMLFVCWITBSQWf7vXZnNfPqlBTE7zqMcFrLNjrrAcKGqwuodZpA/exec";
+
+const questions = [
+  // 🥇 ABSOLUT GRUNDLEGEND
+  {
+    cat: "Verben: -ar / -er / -ir",
+    text: 'María _____ en Madrid.',
+    options: ["vives", "vive", "vivemos", "viven"],
+    correct: 1,
+    feedback: "¡Correcto! „vive" – 3. Person Singular von „vivir" (él/ella/usted)."
+  },
+  {
+    cat: "Ser vs. estar",
+    text: 'Mi hermano _____ enfermo hoy.',
+    options: ["es", "somos", "está", "estamos"],
+    correct: 2,
+    feedback: "„estar" für vorübergehende Zustände wie Krankheit. „Es" wäre für dauerhafte Eigenschaften."
+  },
+  {
+    cat: "Subjektpronomen",
+    text: '_____ hablamos español en clase.',
+    options: ["Yo", "Tú", "Él", "Nosotros"],
+    correct: 3,
+    feedback: "„Nosotros" = wir → „hablamos" (1. Person Plural). Passt perfekt zusammen!"
+  },
+  {
+    cat: "Verneinung mit no",
+    text: '¿Cómo se dice richtig: „Ich esse kein Fleisch"?',
+    options: ["Como no carne.", "No como carne.", "Como carne no.", "No carne como."],
+    correct: 1,
+    feedback: "Im Spanischen steht „no" direkt vor dem Verb: <em>No como carne.</em>"
+  },
+  {
+    cat: "Artikel",
+    text: 'Tengo _____ libro de español en mi mochila.',
+    options: ["un", "una", "unos", "el"],
+    correct: 0,
+    feedback: "„libro" ist maskulin → unbestimmter Artikel „un". „Una" wäre für feminine Nomen."
+  },
+  {
+    cat: "Adjektive & Stellung",
+    text: 'Mi amiga tiene el pelo _____.',
+    options: ["rubio largo", "largo rubio", "rubia larga", "largas rubias"],
+    correct: 0,
+    feedback: "Adjektive stehen im Spanischen meist nach dem Nomen und richten sich nach Genus/Numerus. „pelo" ist maskulin singular."
+  },
+
+  // 🥈 SEHR HÄUFIG
+  {
+    cat: "gustar + Infinitiv",
+    text: 'A mí _____ mucho bailar salsa.',
+    options: ["gusto", "gustas", "gusta", "gustan"],
+    correct: 2,
+    feedback: "Bei „gustar" richtet sich das Verb nach dem, was gefällt – hier „bailar" (Infinitiv, Singular) → „gusta"."
+  },
+  {
+    cat: "ir a + Infinitivo",
+    text: 'Esta tarde nosotros _____ al cine.',
+    options: ["vamos ir", "vamos a ir", "iremos a", "van ir"],
+    correct: 1,
+    feedback: "<em>ir a + Infinitiv</em> drückt nahe Zukunft aus: „vamos a ir" = wir werden gehen."
+  },
+  {
+    cat: "Gruppenverben e → ie",
+    text: '¿A qué hora _____ (empezar) las clases?',
+    options: ["empezamos", "empieza", "empeza", "empiezamos"],
+    correct: 1,
+    feedback: "„empezar" ist ein Gruppenverb e→ie. 3. Person Plural: <em>empiezan</em> – hier: las clases → „empiezan". Aber als Singular-Form: „empieza"."
+  },
+  {
+    cat: "Gruppenverben o → ue",
+    text: 'Mis abuelos _____ (dormir) la siesta todos los días.',
+    options: ["dormen", "duerme", "duermen", "dormien"],
+    correct: 2,
+    feedback: "„dormir" → o wird zu ue in betonten Formen. 3. Person Plural: <em>duermen</em>. „dormen" gibt es nicht!"
+  },
+  {
+    cat: "Reflexive Verben",
+    text: 'Por la mañana yo _____ (levantarse) a las siete.',
+    options: ["levanto me", "me levanto", "me levanta", "levántome"],
+    correct: 1,
+    feedback: "Reflexivpronomen steht vor dem konjugierten Verb: <em>me levanto</em>. Die Wortstellung „levanto me" ist falsch."
+  },
+  {
+    cat: "Direkte Objektpronomen",
+    text: '¿Ves a Juan? – Sí, _____ veo todos los días.',
+    options: ["la", "le", "lo", "les"],
+    correct: 2,
+    feedback: "Juan ist maskulin → direktes Objektpronomen: <em>lo</em>. „le" wäre indirektes Objektpronomen."
+  },
+  {
+    cat: "Possessivbegleiter",
+    text: '_____ padres viven en Sevilla. (meine Eltern)',
+    options: ["Mi", "Mis", "Mío", "Míos"],
+    correct: 1,
+    feedback: "„padres" ist Plural → Possessivbegleiter im Plural: <em>Mis</em> padres."
+  },
+
+  // 🥉 FLÜSSIGERE KOMMUNIKATION
+  {
+    cat: "Pretérito indefinido",
+    text: 'El fin de semana pasado yo _____ (comer) en un restaurante mexicano.',
+    options: ["como", "comí", "comió", "coma"],
+    correct: 1,
+    feedback: "<em>comí</em> = 1. Person Singular im Pretérito indefinido. „comió" wäre 3. Person (él/ella)."
+  },
+  {
+    cat: "Imperativo",
+    text: '_____ (escuchar, tú) la música – ¡es muy buena!',
+    options: ["Escuchas", "Escucha", "Escuchen", "Escuchad"],
+    correct: 1,
+    feedback: "Imperativ für „tú" bei -ar-Verben: einfach 3. Person Singular Präsens → <em>escucha</em>."
+  },
+  {
+    cat: "estar + Gerundio",
+    text: 'Ahora mismo mis amigos _____ fútbol en el parque.',
+    options: ["están jugando", "están jugar", "están jugado", "son jugando"],
+    correct: 0,
+    feedback: "<em>estar + Gerundio</em> = etwas passiert gerade. Gerundio von „jugar" = <em>jugando</em>. Immer „estar", nie „ser"!"
+  },
+  {
+    cat: "Kontraktionen del / al",
+    text: 'Voy _____ médico por la tarde.',
+    options: ["a el", "al", "del", "de el"],
+    correct: 1,
+    feedback: "<em>a + el</em> wird immer zu <em>al</em> zusammengezogen. „a el" ist grammatisch falsch."
+  },
+  {
+    cat: "Komparativ",
+    text: 'Mi hermano es _____ alto _____ yo.',
+    options: ["más … que", "más … de", "muy … que", "tan … que"],
+    correct: 0,
+    feedback: "Komparativ der Überlegenheit: <em>más … que</em>. „de" steht nur vor Zahlen: „más de diez"."
+  },
+
+  // 💪 BASISVERBEN
+  {
+    cat: "Basisverben",
+    text: 'Yo _____ dos hermanas y un hermano.',
+    options: ["soy", "estoy", "tengo", "hago"],
+    correct: 2,
+    feedback: "„tener" = haben → 1. Person Singular: <em>tengo</em>. Nicht mit „ser/estar" verwechseln!"
+  },
+  {
+    cat: "Basisverben",
+    text: 'Los sábados nosotros _____ deporte juntos.',
+    options: ["tenemos", "hacemos", "vamos", "somos"],
+    correct: 1,
+    feedback: "<em>hacer deporte</em> = Sport machen. „hacemos" = 1. Person Plural von „hacer"."
+  },
+  {
+    cat: "Basisverben",
+    text: '¿Adónde _____ tú después de las clases?',
+    options: ["haces", "tienes", "eres", "vas"],
+    correct: 3,
+    feedback: "„ir" = gehen/fahren. 2. Person Singular: <em>vas</em>. Mit „¿adónde?" fragt man nach dem Ziel."
+  },
+  {
+    cat: "Basisverben",
+    text: 'Mi madre _____ aprender inglés este año.',
+    options: ["puede", "quiere", "sabe", "tiene"],
+    correct: 1,
+    feedback: "<em>querer + Infinitiv</em> = wollen. „Mi madre quiere aprender…" = Meine Mutter will lernen…"
+  },
+  {
+    cat: "Basisverben",
+    text: '¿_____ (vosotros) venir a mi fiesta el sábado?',
+    options: ["Queréis", "Sabéis", "Podéis", "Tenéis"],
+    correct: 2,
+    feedback: "<em>poder</em> = können. Vosotros-Form: <em>podéis</em>. Typisch für Einladungen: „¿Podéis venir?"."
+  },
+
+  // 🏠 WICHTIGE SUBSTANTIVE
+  {
+    cat: "Wortschatz: Substantive",
+    text: 'Mi _____ es muy grande – tenemos seis personas en casa.',
+    options: ["ciudad", "familia", "semana", "lengua"],
+    correct: 1,
+    feedback: "<em>la familia</em> = die Familie. Eines der wichtigsten Wörter im Spanischen!"
+  },
+  {
+    cat: "Wortschatz: Substantive",
+    text: 'Por las mañanas voy al _____ en autobús.',
+    options: ["mercado", "hospital", "colegio", "aeropuerto"],
+    correct: 2,
+    feedback: "<em>el colegio</em> = die Schule (in Spanien oft für weiterführende Schule). „la escuela" auch möglich."
+  },
+  {
+    cat: "Wortschatz: Substantive",
+    text: 'En España la _____ principal del día es al mediodía.',
+    options: ["música", "ropa", "comida", "tarde"],
+    correct: 2,
+    feedback: "<em>la comida</em> = das Essen, die Mahlzeit. In Spanien ist das Mittagessen die Hauptmahlzeit."
+  },
+  {
+    cat: "Wortschatz: Substantive",
+    text: 'Los fines de semana tengo mucho _____ para mis hobbies.',
+    options: ["trabajo", "tiempo libre", "deberes", "dinero"],
+    correct: 1,
+    feedback: "<em>el tiempo libre</em> = die Freizeit. Wichtiger Ausdruck für Alltagsgespräche."
+  },
+  {
+    cat: "Wortschatz: Substantive",
+    text: 'Mi mejor _____ se llama Lucía y vive cerca de mi casa.',
+    options: ["profesora", "vecino", "amiga", "hermano"],
+    correct: 2,
+    feedback: "<em>la amiga</em> = die Freundin. „mejor amiga" = beste Freundin. Feminin wegen „Lucía"."
+  },
+
+  // 🎨 ADJEKTIVE
+  {
+    cat: "Wortschatz: Adjektive & Farben",
+    text: 'La camiseta de mi hermano es _____ y su mochila es _____.',
+    options: ["rojo … negro", "roja … negra", "rojas … negros", "rojo … negra"],
+    correct: 1,
+    feedback: "„camiseta" (f) → <em>roja</em>; „mochila" (f) → <em>negra</em>. Adjektive richten sich nach Genus!"
+  },
+  {
+    cat: "Wortschatz: Adjektive & Charakter",
+    text: 'Mi mejor amigo es muy _____ – siempre ayuda a todos.',
+    options: ["simpático", "aburrido", "antipático", "perezoso"],
+    correct: 0,
+    feedback: "<em>simpático</em> = nett, freundlich. „siempre ayuda a todos" (hilft immer allen) passt perfekt dazu."
+  }
+];
+
+let current = 0;
+let score = 0;
+let wrongList = [];
+let userName = "";
+let answered = false;
+let qrGenerated = false;
+
+function startQuiz() {
+  const n = document.getElementById("nameInput").value.trim();
+  if (!n) { document.getElementById("nameInput").focus(); return; }
+  userName = n;
+  showScreen("quizScreen");
+  updateProgress();
+  showQuestion();
+}
+
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+}
+
+function updateProgress() {
+  const pct = (current / questions.length) * 100;
+  document.getElementById("progressBar").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent =
+    current < questions.length ? `Frage ${current + 1} von ${questions.length}` : "";
+}
+
+function showQuestion() {
+  answered = false;
+  const q = questions[current];
+  document.getElementById("qCategory").textContent = q.cat;
+
+  // Highlight blank
+  const text = q.text.replace(/_+/g, '<em>_____</em>');
+  document.getElementById("qText").innerHTML = text;
+
+  const wrap = document.getElementById("optionsWrap");
+  wrap.innerHTML = "";
+  const labels = ["A", "B", "C", "D"];
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerHTML = `<span class="badge">${labels[i]}</span> ${opt}`;
+    btn.onclick = () => selectAnswer(i, btn);
+    wrap.appendChild(btn);
+  });
+
+  const fb = document.getElementById("feedback");
+  fb.className = "feedback";
+  fb.textContent = "";
+  const nb = document.getElementById("nextBtn");
+  nb.className = "next-btn";
+
+  // Scroll to card
+  document.getElementById("questionCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function selectAnswer(i, btn) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const opts = document.querySelectorAll(".option");
+  opts.forEach(o => o.classList.add("disabled"));
+
+  const fb = document.getElementById("feedback");
+  if (i === q.correct) {
+    score++;
+    btn.classList.add("correct");
+    fb.className = "feedback ok show";
+    fb.innerHTML = "✅ " + q.feedback;
+  } else {
+    btn.classList.add("wrong");
+    opts[q.correct].classList.add("correct");
+    fb.className = "feedback nope show";
+    fb.innerHTML = "❌ " + q.feedback;
+    wrongList.push(`F${current + 1}: ${q.text.replace(/_+/g,"_")} → ${q.options[q.correct]}`);
+  }
+
+  const nb = document.getElementById("nextBtn");
+  nb.className = "next-btn show";
+  nb.textContent = current < questions.length - 1 ? "Weiter →" : "Ergebnis anzeigen →";
+}
+
+function nextQuestion() {
+  current++;
+  updateProgress();
+  if (current < questions.length) {
+    showQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  showScreen("resultScreen");
+  document.getElementById("progressBar").style.width = "100%";
+  document.getElementById("progressLabel").textContent = "";
+
+  const pct = Math.round((score / questions.length) * 100);
+  document.getElementById("resultName").textContent = userName;
+  document.getElementById("resultScore").textContent = score;
+  document.getElementById("resultTotal").textContent = `von ${questions.length} Fragen richtig (${pct}%)`;
+
+  setTimeout(() => {
+    document.getElementById("resultBar").style.width = pct + "%";
+  }, 100);
+
+  let emoji, msg;
+  if (pct >= 90) {
+    emoji = "🌟"; msg = "¡Excelente! Du hast das Quiz fast perfekt gemeistert. Dein Spanisch ist wirklich stark!";
+  } else if (pct >= 70) {
+    emoji = "😊"; msg = "¡Muy bien! Du kennst schon viel. Mit etwas Wiederholung wirst du noch sicherer.";
+  } else if (pct >= 50) {
+    emoji = "💪"; msg = "¡Buen intento! Du bist auf dem richtigen Weg – übe die markierten Themen noch einmal.";
+  } else {
+    emoji = "📚"; msg = "No pasa nada – jeder fängt klein an! Schau dir die Grammatik nochmal an und versuch es erneut.";
+  }
+
+  document.getElementById("resultEmoji").textContent = emoji;
+  document.getElementById("resultMsg").textContent = msg;
+
+  sendToSheet(pct);
+}
+
+function sendToSheet(pct) {
+  const msg = document.getElementById("sendingMsg");
+  msg.textContent = "⏳ Ergebnis wird übermittelt…";
+
+  const payload = {
+    name: userName,
+    score: score,
+    total: questions.length,
+    wrong: wrongList
+  };
+
+  fetch(SHEET_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  }).then(() => {
+    msg.textContent = "✅ Ergebnis wurde gespeichert.";
+  }).catch(() => {
+    msg.textContent = "⚠️ Übermittlung fehlgeschlagen – kein Internetzugang?";
+  });
+}
+
+function resetQuiz() {
+  current = 0;
+  score = 0;
+  wrongList = [];
+  answered = false;
+  updateProgress();
+  showScreen("nameScreen");
+  document.getElementById("nameInput").value = "";
+}
+
+function toggleQR() {
+  const modal = document.getElementById("qrModal");
+  modal.classList.toggle("open");
+  if (!qrGenerated) {
+    new QRCode(document.getElementById("qrcode"), {
+      text: window.location.href,
+      width: 200,
+      height: 200,
+      colorDark: "#2d5a9e",
+      colorLight: "#ffffff"
+    });
+    qrGenerated = true;
+  }
+}
+</script>
+
+</body>
+</html>
