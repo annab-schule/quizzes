@@ -161,6 +161,20 @@ function testQuizFile(filePath) {
     rel,
     'renderQuestion() wird nie aufgerufen — Quiz startet nicht'
   );
+
+  // 15. Keine typografischen Anführungszeichen (U+201E „) in JS-Strings
+  // Diese brechen den JavaScript-Parser wenn sie mit ASCII-" kombiniert werden
+  const scriptStart = content.indexOf('<script>');
+  const scriptEnd = content.lastIndexOf('</script>');
+  if (scriptStart !== -1 && scriptEnd !== -1) {
+    const scriptContent = content.slice(scriptStart, scriptEnd);
+    const typographicQuotes = scriptContent.match(/\u201e/g);
+    assert(
+      !typographicQuotes || typographicQuotes.length === 0,
+      rel,
+      `Typografische Anführungszeichen (\u201e) in JavaScript gefunden — bricht den JS-Parser (${(typographicQuotes||[]).length}x)`
+    );
+  }
 }
 
 // === Run ===
