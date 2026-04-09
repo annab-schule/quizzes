@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="quiz-meta" content="Klasse 7–10 · Was weißt du über Künstliche Intelligenz?">
+  <title>🤖 KI-Wissen – Quiz</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+      background: #f0f4ff;
+      color: #1e293b;
+      min-height: 100vh;
+      padding: 0 0 60px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #2d6a9f 100%);
+      color: #ffffff;
+      padding: 28px 24px 20px;
+      position: relative;
+      overflow: hidden;
+    }
+    .header::before {
+      content: '🤖';
+      position: absolute;
+      right: 80px;
+      top: 10px;
+      font-size: 72px;
+      opacity: 0.15;
+    }
+    .header h1 {
+      font-family: Palatino, Georgia, serif;
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      line-height: 1.2;
+      color: #ffffff;
+    }
+    .header p {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      margin-top: 4px;
+      color: #ffffff;
+    }
+    .progress-wrap {
+      background: rgba(255,255,255,0.2);
+      border-radius: 99px;
+      height: 8px;
+      margin-top: 16px;
+      overflow: hidden;
+    }
+    .progress-bar {
+      background: #f59e0b;
+      height: 100%;
+      border-radius: 99px;
+      transition: width 0.5s ease;
+      width: 0%;
+    }
+    .progress-label {
+      font-size: 0.78rem;
+      opacity: 0.8;
+      margin-top: 6px;
+      color: #ffffff;
+    }
+    .qr-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255,255,255,0.18);
+      border: 2px solid rgba(255,255,255,0.4);
+      color: #ffffff;
+      border-radius: 10px;
+      padding: 6px 10px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .qr-btn:hover { background: rgba(255,255,255,0.3); }
+
+    .qr-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 999;
+      align-items: center;
+      justify-content: center;
+    }
+    .qr-modal.open { display: flex; }
+    .qr-box {
+      background: #ffffff;
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    }
+    .qr-box h3 {
+      font-family: Palatino, Georgia, serif;
+      margin-bottom: 12px;
+      color: #1e3a5f;
+    }
+    .qr-box p { font-size: 0.85rem; color: #64748b; margin-top: 12px; }
+    .qr-close {
+      margin-top: 16px;
+      background: #1e3a5f;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 24px;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    main {
+      max-width: 680px;
+      margin: 32px auto 0;
+      padding: 0 16px;
+    }
+
+    .question-card {
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(30,58,95,0.10);
+      padding: 28px 28px 24px;
+      animation: fadeUp 0.35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .q-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .q-number {
+      background: #1e3a5f;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-weight: 700;
+      font-size: 0.82rem;
+    }
+    .q-category {
+      background: #eef2ff;
+      color: #1e3a5f;
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+    .q-emoji {
+      font-size: 2.6rem;
+      margin-bottom: 10px;
+      display: block;
+    }
+    .q-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      line-height: 1.4;
+      margin-bottom: 20px;
+      color: #1e293b;
+    }
+
+    .answers { display: grid; gap: 10px; }
+    .answer-btn {
+      background: #f8faff;
+      border: 2px solid #dde4f5;
+      border-radius: 12px;
+      padding: 13px 18px;
+      text-align: left;
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .answer-btn:hover:not(:disabled) {
+      background: #eef2ff;
+      border-color: #1e3a5f;
+      transform: translateX(4px);
+    }
+    .answer-btn .letter {
+      min-width: 30px;
+      height: 30px;
+      background: #1e3a5f;
+      color: #ffffff;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 900;
+      flex-shrink: 0;
+    }
+    .answer-btn.correct { background: #ecfdf5; border-color: #10b981; color: #065f46; }
+    .answer-btn.correct .letter { background: #10b981; }
+    .answer-btn.wrong { background: #fef2f2; border-color: #ef4444; color: #7f1d1d; }
+    .answer-btn.wrong .letter { background: #ef4444; }
+    .answer-btn:disabled { cursor: default; }
+
+    .feedback {
+      display: none;
+      margin-top: 16px;
+      border-radius: 12px;
+      padding: 14px 18px;
+      font-size: 0.93rem;
+      line-height: 1.5;
+      animation: fadeUp 0.25s ease both;
+    }
+    .feedback.correct-fb {
+      display: block;
+      background: #ecfdf5;
+      border-left: 4px solid #10b981;
+      color: #065f46;
+    }
+    .feedback.wrong-fb {
+      display: block;
+      background: #fff7ed;
+      border-left: 4px solid #f59e0b;
+      color: #92400e;
+    }
+
+    .next-btn {
+      display: none;
+      margin-top: 18px;
+      width: 100%;
+      background: #1e3a5f;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s;
+    }
+    .next-btn:hover { background: #162d4a; transform: translateY(-2px); }
+    .next-btn.visible { display: block; }
+
+    .score-screen {
+      display: none;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(30,58,95,0.10);
+      padding: 36px 28px;
+      text-align: center;
+      animation: fadeUp 0.4s ease both;
+    }
+    .score-screen.visible { display: block; }
+    .score-emoji { font-size: 4rem; margin-bottom: 12px; }
+    .score-title {
+      font-family: Palatino, Georgia, serif;
+      font-size: 1.7rem;
+      color: #1e3a5f;
+      margin-bottom: 8px;
+    }
+    .score-sub { color: #64748b; font-size: 0.95rem; margin-bottom: 24px; }
+    .score-number { font-size: 3.5rem; font-weight: 900; color: #1e3a5f; line-height: 1; }
+    .score-of { font-size: 1.1rem; color: #64748b; margin-bottom: 24px; }
+    .score-msg {
+      background: #eef2ff;
+      border-radius: 12px;
+      padding: 16px 20px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1e3a5f;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
+    .stars { font-size: 2rem; margin-bottom: 16px; }
+    .again-btn {
+      background: #f59e0b;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 32px;
+      font-size: 1rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .again-btn:hover { transform: scale(1.04); }
+    .back-link {
+      display: block;
+      text-align: center;
+      margin-top: 24px;
+      color: #1e3a5f;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+    .back-link:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <button class="qr-btn" onclick="openQR()" title="QR-Code anzeigen">⊞</button>
+  <h1>🤖 Was weißt du über KI?</h1>
+  <p>Klasse 7–10 · Künstliche Intelligenz · 10 Fragen</p>
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div class="progress-label" id="progressLabel">Frage 1 von 10</div>
+</div>
+
+<div class="qr-modal" id="qrModal" onclick="closeQR(event)">
+  <div class="qr-box">
+    <h3>📱 Quiz teilen</h3>
+    <div id="qrcode"></div>
+    <p>Scanne den Code mit dem Handy!</p>
+    <button class="qr-close" onclick="closeQR()">Schließen</button>
+  </div>
+</div>
+
+<main>
+  <div class="question-card" id="questionCard">
+    <div class="q-meta">
+      <span class="q-number" id="qNumber">1 / 10</span>
+      <span class="q-category" id="qCategory">KI-Grundlagen</span>
+    </div>
+    <span class="q-emoji" id="qEmoji">🤖</span>
+    <div class="q-text" id="qText">Laden…</div>
+    <div class="answers" id="answersContainer"></div>
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Weiter →</button>
+  </div>
+
+  <div class="score-screen" id="scoreScreen">
+    <div class="score-emoji" id="scoreEmoji">🏆</div>
+    <div class="score-title" id="scoreTitle">Super gemacht!</div>
+    <div class="score-sub">Du hast das KI-Quiz beendet!</div>
+    <div class="score-number" id="scoreNumber">0</div>
+    <div class="score-of" id="scoreOf">von 10 Punkten</div>
+    <div class="stars" id="scoreStars">⭐⭐⭐</div>
+    <div class="score-msg" id="scoreMsg">Klasse!</div>
+    <button class="again-btn" onclick="restartQuiz()">🔄 Nochmal spielen</button>
+    <a class="back-link" href="../index.html">← Zurück zur Übersicht</a>
+  </div>
+</main>
+
+<script>
+var questions = [
+  {
+    emoji: "🤖",
+    category: "KI-Grundlagen",
+    text: "Was bedeutet „KI" überhaupt?",
+    answers: ["Kreative Informatik", "Künstliche Intelligenz", "Komplexe Information", "Kollektive Innovation"],
+    correct: 1,
+    feedback: {
+      right: "✅ Genau! KI steht für Künstliche Intelligenz – auf Englisch: Artificial Intelligence (AI). Computerprogramme, die so tun als ob sie denken könnten. 🧠",
+      wrong: "💡 KI steht für Künstliche Intelligenz! Auf Englisch heißt es Artificial Intelligence – kurz AI. Das ist der Begriff, den du überall hörst."
+    }
+  },
+  {
+    emoji: "💬",
+    category: "Chatbots",
+    text: "ChatGPT ist ein bekannter KI-Chatbot. Von welcher Firma stammt er?",
+    answers: ["Google", "Microsoft", "OpenAI", "Apple"],
+    correct: 2,
+    feedback: {
+      right: "✅ Richtig! ChatGPT kommt von OpenAI – einem amerikanischen Unternehmen. Microsoft hat aber viel Geld in OpenAI investiert! 💰",
+      wrong: "💡 ChatGPT kommt von OpenAI! Microsoft hat zwar viel Geld investiert, aber OpenAI ist der Entwickler. Google hat einen eigenen Chatbot: Gemini."
+    }
+  },
+  {
+    emoji: "🧠",
+    category: "Wie KI lernt",
+    text: "Wie lernt eine KI – zum Beispiel wie man Katzen auf Fotos erkennt?",
+    answers: ["Jemand erklärt ihr alles per Hand", "Sie schaut KI-YouTube-Videos", "Sie analysiert tausende Beispielbilder", "Sie denkt selbst nach wie ein Mensch"],
+    correct: 2,
+    feedback: {
+      right: "✅ Super! Man zeigt der KI tausende Bilder von Katzen (und Nicht-Katzen) – so lernt sie Muster zu erkennen. Das nennt man maschinelles Lernen! 📸",
+      wrong: "💡 KI lernt durch riesige Mengen an Beispieldaten! Man zeigt ihr tausende Katzenbilder – und irgendwann erkennt sie selbst: Das ist eine Katze. Das nennt sich maschinelles Lernen."
+    }
+  },
+  {
+    emoji: "🎵",
+    category: "KI im Alltag",
+    text: "Wenn Spotify dir Musik empfiehlt, die du noch nicht kennst – was steckt dahinter?",
+    answers: ["Ein DJ sucht Musik für dich aus", "Eine KI analysiert deinen Musikgeschmack", "Zufallsgenerator", "Deine Freunde empfehlen sie heimlich"],
+    correct: 1,
+    feedback: {
+      right: "✅ Genau! Eine KI schaut, welche Musik du magst, und findet Ähnlichkeiten zu anderen Songs. So entstehen Playlists wie „Discover Weekly". 🎧",
+      wrong: "💡 Hinter den Musikempfehlungen steckt KI! Sie analysiert deinen Musikgeschmack und vergleicht ihn mit Millionen anderer Nutzer – und findet so passende neue Songs."
+    }
+  },
+  {
+    emoji: "🖼️",
+    category: "Bild-KI",
+    text: "Was kann eine sogenannte „Bild-KI" wie DALL-E oder Midjourney?",
+    answers: ["Fotos automatisch sortieren", "Aus Text-Beschreibungen Bilder erzeugen", "Bilder in Videos umwandeln", "Nur Schwarz-Weiß-Fotos bearbeiten"],
+    correct: 1,
+    feedback: {
+      right: "✅ Richtig! Du schreibst z.B. „Ein Astronaut reitet auf einem Pferd auf dem Mond" – und die KI malt das Bild! Unglaublich, oder? 🚀🐴",
+      wrong: "💡 Bild-KIs wie DALL-E können aus Textbeschreibungen echte Bilder erzeugen! Du schreibst was du dir vorstellst – und sie malt es. Das Ergebnis überrascht oft."
+    }
+  },
+  {
+    emoji: "⚠️",
+    category: "KI-Probleme",
+    text: "KI kann manchmal Fehler machen und Dinge erfinden, die nicht stimmen. Wie nennt man das?",
+    answers: ["KI-Crash", "Halluzination", "Datenfehler", "Systemausfall"],
+    correct: 1,
+    feedback: {
+      right: "✅ Super Wissen! Man nennt es „Halluzination" – die KI erfindet selbstbewusst Fakten, die falsch sind. Deshalb immer nachprüfen! 🔍",
+      wrong: "💡 Man nennt es „Halluzination"! KI erfindet manchmal Dinge, die klingen als wären sie wahr – aber es ist erfunden. Deshalb: Wichtige Infos immer in echten Quellen nachprüfen!"
+    }
+  },
+  {
+    emoji: "🚗",
+    category: "KI im Alltag",
+    text: "Welches dieser Dinge nutzt KI, um zu funktionieren?",
+    answers: ["Ein normales Fahrrad", "Ein selbstfahrendes Auto", "Ein Bleistift", "Eine Wanduhr"],
+    correct: 1,
+    feedback: {
+      right: "✅ Genau! Selbstfahrende Autos nutzen KI, um Straßen, Schilder, Fußgänger und andere Autos zu erkennen – und sicher zu fahren. 🚗💨",
+      wrong: "💡 Selbstfahrende Autos sind ein tolles Beispiel für KI im Alltag! Sie erkennen ihre Umgebung mit Kameras und Sensoren – gesteuert von KI-Algorithmen."
+    }
+  },
+  {
+    emoji: "✍️",
+    category: "Text-KI",
+    text: "Du fragst eine KI: „Schreib mir ein Gedicht über den Frühling." Was passiert?",
+    answers: ["Die KI sucht ein Gedicht im Internet", "Die KI kopiert ein bekanntes Gedicht", "Die KI erstellt selbst ein neues Gedicht", "Die KI sagt: Das kann ich nicht"],
+    correct: 2,
+    feedback: {
+      right: "✅ Richtig! Moderne Text-KIs wie ChatGPT erzeugen völlig neue Texte – sie kopieren nicht, sondern erstellen etwas Neues. Fast wie ein kreativer Assistent! ✨",
+      wrong: "💡 Moderne KIs erstellen komplett neue Texte! Sie suchen nicht im Internet, sondern generieren Wörter basierend auf dem, was sie beim Training gelernt haben."
+    }
+  },
+  {
+    emoji: "🌍",
+    category: "KI & Gesellschaft",
+    text: "Warum ist es wichtig, dass Menschen verstehen wie KI funktioniert?",
+    answers: ["Damit man KI reparieren kann", "Um KI-Fehler und Manipulation erkennen zu können", "KI-Wissen ist nicht wichtig", "Nur Programmierer müssen das wissen"],
+    correct: 1,
+    feedback: {
+      right: "✅ Sehr gut gedacht! Wer KI versteht, kann Fehlinformationen, gefälschte Bilder oder manipulative Inhalte besser erkennen. Digitale Bildung schützt! 🛡️",
+      wrong: "💡 KI zu verstehen ist für alle wichtig! Deepfakes, Falschinformationen, manipulative Werbung – wer weiß wie KI funktioniert, kann sich besser schützen."
+    }
+  },
+  {
+    emoji: "🔮",
+    category: "KI-Zukunft",
+    text: "Was können KI-Systeme heute noch NICHT so gut wie Menschen?",
+    answers: ["Schach spielen", "Texte übersetzen", "Echte Gefühle empfinden", "Bilder erkennen"],
+    correct: 2,
+    feedback: {
+      right: "✅ Absolut richtig! KI simuliert zwar Emotionen in Texten – aber sie fühlt nichts. Kein Mitgefühl, keine echte Freude, kein Schmerz. Das bleibt (bisher) menschlich. ❤️",
+      wrong: "💡 Echte Gefühle empfinden können KIs nicht! Sie können Emotionen beschreiben oder simulieren – aber fühlen tun sie nichts. Schach spielen, übersetzen und Bilder erkennen beherrscht KI schon sehr gut."
+    }
+  }
+];
+
+var current = 0;
+var score = 0;
+var answered = false;
+
+function renderQuestion() {
+  answered = false;
+  var q = questions[current];
+  document.getElementById('qNumber').textContent = (current + 1) + ' / ' + questions.length;
+  document.getElementById('qCategory').textContent = q.category;
+  document.getElementById('qEmoji').textContent = q.emoji;
+  document.getElementById('qText').textContent = q.text;
+
+  var pct = (current / questions.length) * 100;
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = 'Frage ' + (current + 1) + ' von ' + questions.length;
+
+  var letters = ['A', 'B', 'C', 'D'];
+  var container = document.getElementById('answersContainer');
+  container.innerHTML = '';
+  q.answers.forEach(function(ans, i) {
+    var btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.innerHTML = '<span class="letter">' + letters[i] + '</span>' + ans;
+    btn.onclick = (function(idx) { return function() { selectAnswer(idx); }; })(i);
+    container.appendChild(btn);
+  });
+
+  var fb = document.getElementById('feedback');
+  fb.className = 'feedback';
+  fb.innerHTML = '';
+  document.getElementById('nextBtn').className = 'next-btn';
+
+  var card = document.getElementById('questionCard');
+  card.style.animation = 'none';
+  void card.offsetHeight;
+  card.style.animation = '';
+}
+
+function selectAnswer(index) {
+  if (answered) return;
+  answered = true;
+  var q = questions[current];
+  var btns = document.querySelectorAll('.answer-btn');
+  btns.forEach(function(b) { b.disabled = true; });
+
+  var fb = document.getElementById('feedback');
+  if (index === q.correct) {
+    score++;
+    btns[index].classList.add('correct');
+    fb.className = 'feedback correct-fb';
+    fb.innerHTML = q.feedback.right;
+  } else {
+    btns[index].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback wrong-fb';
+    fb.innerHTML = q.feedback.wrong;
+  }
+  document.getElementById('nextBtn').className = 'next-btn visible';
+}
+
+function nextQuestion() {
+  current++;
+  if (current >= questions.length) {
+    showScore();
+  } else {
+    renderQuestion();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function showScore() {
+  document.getElementById('questionCard').style.display = 'none';
+  var screen = document.getElementById('scoreScreen');
+  screen.classList.add('visible');
+
+  var pct = score / questions.length;
+  document.getElementById('scoreNumber').textContent = score;
+  document.getElementById('scoreOf').textContent = 'von ' + questions.length + ' Punkten';
+
+  var emoji, title, stars, msg;
+  if (pct >= 0.9) {
+    emoji = '🏆'; title = 'KI-Experte!'; stars = '⭐⭐⭐⭐⭐';
+    msg = 'Beeindruckend – du weißt schon richtig viel über KI! Mit diesem Wissen bist du gut auf die digitale Zukunft vorbereitet. 🚀';
+  } else if (pct >= 0.7) {
+    emoji = '🎉'; title = 'Super Ergebnis!'; stars = '⭐⭐⭐⭐';
+    msg = 'Du kennst dich schon gut aus! Ein paar Lücken gibt es noch – aber das kommt mit der Zeit. Weiter so! 💪';
+  } else if (pct >= 0.5) {
+    emoji = '😊'; title = 'Guter Start!'; stars = '⭐⭐⭐';
+    msg = 'Du weißt schon einiges über KI. Lies dich ruhig weiter ein – das Thema wird immer wichtiger! 📚';
+  } else {
+    emoji = '🌱'; title = 'Auf geht\'s!'; stars = '⭐⭐';
+    msg = 'KI ist ein spannendes und neues Thema – kein Stress, wenn noch nicht alles sitzt. Schau dir die Erklärungen an und probier\'s nochmal! 😄';
+  }
+
+  document.getElementById('scoreEmoji').textContent = emoji;
+  document.getElementById('scoreTitle').textContent = title;
+  document.getElementById('scoreStars').textContent = stars;
+  document.getElementById('scoreMsg').textContent = msg;
+  document.getElementById('progressBar').style.width = '100%';
+  document.getElementById('progressLabel').textContent = 'Fertig! 🎉';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  document.getElementById('scoreScreen').classList.remove('visible');
+  document.getElementById('questionCard').style.display = 'block';
+  renderQuestion();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+var qrGenerated = false;
+function openQR() {
+  document.getElementById('qrModal').classList.add('open');
+  if (!qrGenerated) {
+    new QRCode(document.getElementById('qrcode'), {
+      text: window.location.href,
+      width: 180,
+      height: 180,
+      colorDark: '#1e3a5f',
+      colorLight: '#ffffff'
+    });
+    qrGenerated = true;
+  }
+}
+function closeQR(e) {
+  if (!e || e.target === document.getElementById('qrModal')) {
+    document.getElementById('qrModal').classList.remove('open');
+  }
+}
+
+renderQuestion();
+</script>
+
+</body>
+</html>
