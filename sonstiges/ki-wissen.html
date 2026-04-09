@@ -580,8 +580,14 @@ var qrGenerated = false;
 function openQR() {
   document.getElementById('qrModal').classList.add('open');
   if (!qrGenerated) {
-    new QRCode(document.getElementById('qrcode'), {
-      text: window.location.href,
+    var url = window.location.href;
+    if (url.startsWith('file://')) {
+      url = 'https://annab-schule.github.io/quizzes/sonstiges/ki-wissen.html';
+    }
+    var qrDiv = document.getElementById('qrcode');
+    qrDiv.innerHTML = '';
+    new QRCode(qrDiv, {
+      text: url,
       width: 180,
       height: 180,
       colorDark: '#1e3a5f',
