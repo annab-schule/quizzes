@@ -1,0 +1,16 @@
+#!/bin/sh
+# Pre-push Hook: Quiz-Tests vor jedem Push ausführen
+
+echo ""
+echo "🔍 Quiz-Tests werden ausgeführt..."
+echo ""
+
+node "$(git rev-parse --show-toplevel)/tests/test-quizzes.js"
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -ne 0 ]; then
+  echo "🚫 Push abgebrochen — bitte Fehler oben beheben."
+  exit 1
+fi
+
+exit 0
