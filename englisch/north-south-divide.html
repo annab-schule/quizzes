@@ -1,368 +1,458 @@
-import { useState } from “react”;
+<!DOCTYPE html>
 
-const C = {
-navy: “#1F3864”,
-blue: “#2563a8”,
-mid: “#4a7fb5”,
-red: “#b91c1c”,
-orange: “#c2410c”,
-green: “#16873f”,
-sea: “#cde4f5”,
-};
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="quiz-meta" content="Q12 · North-South Divide">
+<title>North-South Divide · Q12</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
-const regionData = {
-scotland: {
-name: “Scotland”, color: C.blue, light: “#dbeafe”,
-headline: “Voted strongly Remain. The Brexit result – decided by English votes – has reignited demands for a second independence referendum.”,
-stats: [
-[“Life expectancy”, “78.0 / 81.8 yrs (M/F)”],
-[“GVA per person”, “£28,300”],
-[“Weekly earnings”, “£608 median”],
-[“Unemployment”, “4.1%”],
-[“Brexit vote”, “62% Remain”],
-],
-facts: [
-“SNP has demanded IndyRef2 since the 2016 Brexit vote”,
-“62% of Scots voted Remain – taken out of EU against their will”,
-“Devolved Parliament (Holyrood) with significant powers since 1999”,
-“North Sea oil remains a central argument for independence”,
-],
-},
-nireland: {
-name: “Northern Ireland”, color: C.green, light: “#dcfce7”,
-headline: “The most complex case: Brexit threatens the Good Friday Agreement and the open border with the Republic of Ireland.”,
-stats: [
-[“Life expectancy”, “78.3 / 82.2 yrs (M/F)”],
-[“GVA per person”, “£22,800”],
-[“Weekly earnings”, “£560 median”],
-[“Unemployment”, “2.8%”],
-[“Brexit vote”, “56% Remain”],
-],
-facts: [
-“Only UK region sharing a land border with an EU member state”,
-“Good Friday Agreement (1998) ended decades of sectarian conflict”,
-“Brexit created the divisive ‘Northern Ireland Protocol’”,
-“Sinn Féin became the largest party in 2022 – a historic first since partition”,
-],
-},
-north: {
-name: “The North”, color: C.red, light: “#fee2e2”,
-headline: “Former industrial heartland – coal, steel, shipbuilding. Home to the ‘Red Wall’ and the sharpest end of the North-South divide.”,
-stats: [
-[“Life expectancy”, “77.6 / 81.5 yrs (M/F) – lowest in England”],
-[“GVA per person”, “~£21,500 (North East)”],
-[“Weekly earnings”, “~£530 median”],
-[“Unemployment”, “5.2% (North East)”],
-[“Brexit vote”, “Strong Leave majority”],
-],
-facts: [
-“North East has the lowest GVA per person in England”,
-“Life expectancy up to 4 years shorter than in London”,
-“Highest rates of child poverty in the UK”,
-“‘Red Wall’ seats switched Labour → Conservative in 2019, then back in 2024”,
-“Government’s ‘Levelling Up’ agenda widely seen as underfunded”,
-],
-},
-wales: {
-name: “Wales”, color: C.orange, light: “#ffedd5”,
-headline: “One of the UK’s poorest regions – and one that received major EU funding. Yet it voted Leave. A striking paradox.”,
-stats: [
-[“Life expectancy”, “79.0 / 82.8 yrs (M/F)”],
-[“GVA per person”, “~£22,500 – lowest in Great Britain”],
-[“Weekly earnings”, “~£540 median”],
-[“Unemployment”, “3.9%”],
-[“Brexit vote”, “52.5% Leave”],
-],
-facts: [
-“Received more EU structural funds than it contributed”,
-“Despite this, 52.5% voted Leave in 2016”,
-“Devolved assembly (Senedd) with its own parliament since 1999”,
-“Heavy deindustrialisation in the South Wales valleys”,
-],
-},
-midlands: {
-name: “The Midlands”, color: C.mid, light: “#e0eaf5”,
-headline: “A mixed picture: industrial heritage alongside new investment. Birmingham is the UK’s second largest city.”,
-stats: [
-[“Life expectancy”, “79.2 / 82.9 yrs (M/F)”],
-[“GVA per person”, “~£24,000”],
-[“Weekly earnings”, “~£590 median”],
-[“Unemployment”, “4.4%”],
-[“Brexit vote”, “Majority Leave”],
-],
-facts: [
-“Birmingham: UK’s second largest city, majority non-white British”,
-“Manufacturing base: cars (Jaguar Land Rover), engineering”,
-“Voted Leave in 2016 across most constituencies”,
-“Significant ‘Levelling Up’ investment targeted here”,
-],
-},
-south: {
-name: “London & the South”, color: C.navy, light: “#e8eef7”,
-headline: “The UK’s economic engine – home to global finance, government, and the highest salaries. Also the epicentre of the housing crisis.”,
-stats: [
-[“Life expectancy”, “81.3 / 84.9 yrs (M/F)”],
-[“GVA per person”, “£57,000 (London)”],
-[“Weekly earnings”, “£780/week (London median)”],
-[“Unemployment”, “3.8%”],
-[“Brexit vote”, “London: 60% Remain”],
-],
-facts: [
-“London alone generates ~25% of UK GDP”,
-“Average London house price: over £700,000”,
-“Life expectancy up to 4 years longer than the North East”,
-“78% of Londoners voted Remain – major cultural divide with the rest of England”,
-“‘London vs the rest’ is one of the defining tensions in modern British politics”,
-],
-},
-};
+body {
+font-family: -apple-system, ‘Segoe UI’, system-ui, sans-serif;
+background: #f0f4ff;
+color: #1a1a1a;
+padding: 14px;
+min-height: 100vh;
+}
 
-const svgPaths = {
-scotland:  “M 95 5 L 210 5 L 225 20 L 235 50 L 228 80 L 235 105 L 222 130 L 195 145 L 168 152 L 138 152 L 108 145 L 88 130 L 78 105 L 85 80 L 68 48 L 80 22 Z”,
-nireland:  “M 18 108 L 58 95 L 65 115 L 68 138 L 48 148 L 20 138 Z”,
-north:     “M 88 130 L 108 145 L 138 152 L 168 152 L 195 145 L 222 130 L 235 150 L 235 182 L 228 225 L 218 252 L 92 252 L 80 220 L 75 182 Z”,
-wales:     “M 62 252 L 92 252 L 98 278 L 100 310 L 92 335 L 72 345 L 50 335 L 40 308 L 46 278 Z”,
-midlands:  “M 92 252 L 218 252 L 224 276 L 224 325 L 214 348 L 100 348 L 98 325 L 98 278 Z”,
-south:     “M 50 335 L 92 348 L 214 348 L 226 360 L 242 392 L 245 425 L 235 455 L 182 465 L 136 468 L 88 462 L 48 448 L 35 420 L 40 390 L 52 360 Z”,
-};
+h1, h2 { font-family: Palatino, Georgia, serif; }
 
-const labelPos = {
-scotland:  { x: 155, y: 78,  lines: [“Scotland”] },
-nireland:  { x: 43,  y: 122, lines: [“N.I.”],         small: true },
-north:     { x: 157, y: 193, lines: [“The”, “North”] },
-wales:     { x: 71,  y: 298, lines: [“Wales”] },
-midlands:  { x: 160, y: 300, lines: [“Midlands”] },
-south:     { x: 152, y: 408, lines: [“London &”, “the South”] },
-};
+.back-link { margin-bottom: 10px; }
+.back-link a { font-size: 12px; color: #2d5a9e; text-decoration: none; }
+.back-link a:hover { text-decoration: underline; }
 
-const glossary = [
-{ term: “GVA (Gross Value Added)”, def: “The economic output of a region – similar to GDP. A key measure of regional wealth.” },
-{ term: “Deindustrialisation”, def: “The decline of traditional manufacturing industries such as coal mining, steelworks, and shipbuilding – which dominated the North and Wales.” },
-{ term: “The Red Wall”, def: “A line of traditionally Labour-voting seats in the North and Midlands that switched to the Conservative Party in 2019. Many switched back in 2024.” },
-{ term: “Levelling Up”, def: “Boris Johnson’s government policy (2019–2022) to reduce regional economic inequality between London/South and the rest of the UK. Widely criticised as underfunded.” },
-{ term: “Devolved Parliament”, def: “A regional government with its own decision-making powers, separate from Westminster. Scotland, Wales, and Northern Ireland all have devolved assemblies.” },
-{ term: “Life Expectancy Gap”, def: “Men in the North East live up to 4 years less than men in London. This gap reflects differences in poverty, healthcare access, and lifestyle.” },
-];
+/* ── Header ── */
+.header {
+background: #1f3864;
+color: white;
+padding: 13px 18px;
+border-radius: 4px;
+margin-bottom: 14px;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+.header-title { font-size: 18px; font-weight: bold; font-family: Palatino, Georgia, serif; }
+.header-sub { font-size: 11px; color: #aaccff; font-style: italic; margin-top: 3px; }
+.qr-btn {
+background: rgba(255,255,255,0.15);
+border: 1px solid rgba(255,255,255,0.3);
+color: white;
+width: 36px; height: 36px;
+border-radius: 6px;
+font-size: 18px;
+cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+flex-shrink: 0;
+}
+.qr-btn:hover { background: rgba(255,255,255,0.28); }
 
-const taskQuestions = [
-{ n: “1”, q: “Note down two differences between the North and London & the South that you find striking.” },
-{ n: “2”, q: “What do you think caused these differences? Note at least one idea.” },
-{ n: “3”, q: “Does this data suggest the UK is a united country? Note your first instinct – we will return to this question at the end of the unit.” },
-];
+/* ── QR Modal ── */
+.qr-modal {
+display: none; position: fixed;
+top: 0; left: 0; right: 0; bottom: 0;
+background: rgba(0,0,0,0.5);
+z-index: 100; align-items: center; justify-content: center;
+}
+.qr-modal.open { display: flex; }
+.qr-box { background: white; padding: 24px; border-radius: 8px; text-align: center; max-width: 220px; }
+.qr-box p { font-size: 12px; color: #555; margin-top: 10px; }
+.qr-close { margin-top: 12px; background: #1f3864; color: white; border: none; padding: 7px 20px; border-radius: 4px; cursor: pointer; font-size: 13px; }
 
-const lifeExp = [
-{ key: “south”,    val: 81.3 },
-{ key: “midlands”, val: 79.2 },
-{ key: “wales”,    val: 79.0 },
-{ key: “scotland”, val: 78.0 },
-{ key: “nireland”, val: 78.3 },
-{ key: “north”,    val: 77.6 },
-].sort((a, b) => b.val - a.val);
+/* ── Layout ── */
+.main { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
 
-const TAB = { EXPLORE: “explore”, GLOSSARY: “glossary”, TASK: “task” };
+/* ── Map panel ── */
+.map-panel { background: white; border: 1.5px solid #ccd6e8; padding: 10px; border-radius: 4px; flex-shrink: 0; }
 
-export default function App() {
-const [selected, setSelected] = useState(null);
-const [tab, setTab] = useState(TAB.EXPLORE);
+.rpath { cursor: pointer; stroke: white; stroke-width: 1.5; transition: filter 0.15s, stroke-width 0.15s; }
+.rpath:hover { filter: brightness(1.18); stroke-width: 2; }
+.rpath.sel { stroke-width: 2.8; filter: brightness(1.12); }
+.rlabel { pointer-events: none; font-weight: bold; font-family: -apple-system,‘Segoe UI’,sans-serif; }
 
-const r = selected ? regionData[selected] : null;
+.legend { margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; }
+.leg-item { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; cursor: pointer; padding: 2px 4px; border-radius: 3px; }
+.leg-item:hover, .leg-item.sel { background: #f0f4ff; }
+.leg-dot { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
+.leg-text { font-size: 10.5px; color: #555; }
+.leg-item.sel .leg-text { font-weight: bold; }
 
-const tabStyle = (t) => ({
-padding: “8px 14px”,
-fontSize: “12px”,
-fontWeight: “bold”,
-cursor: “pointer”,
-border: “none”,
-borderBottom: tab === t ? `2px solid ${C.navy}` : “2px solid transparent”,
-background: “white”,
-color: tab === t ? C.navy : “#888”,
-fontFamily: “Calibri, sans-serif”,
-transition: “all 0.15s”,
-});
+/* ── Info panel ── */
+.info-panel { flex: 1; min-width: 280px; }
 
-return (
-<div style={{ fontFamily: “Calibri,‘Segoe UI’,system-ui,sans-serif”, background: “#f0f4ff”, minHeight: “100vh”, padding: “14px” }}>
+.tab-bar { background: white; border: 1.5px solid #ccd6e8; border-bottom: 1px solid #eee; border-radius: 4px 4px 0 0; display: flex; }
+.tab-btn { padding: 9px 16px; font-size: 12px; font-weight: bold; cursor: pointer; border: none; border-bottom: 2px solid transparent; background: white; color: #888; font-family: -apple-system,‘Segoe UI’,sans-serif; transition: all 0.15s; }
+.tab-btn.active { color: #1f3864; border-bottom-color: #1f3864; }
+.tab-btn:hover:not(.active) { color: #444; }
+
+.tab-pane { background: white; border: 1.5px solid #ccd6e8; border-top: none; border-radius: 0 0 4px 4px; display: none; }
+.tab-pane.active { display: block; }
+
+/* ── Explore tab ── */
+.prompt { padding: 24px; text-align: center; color: #888; }
+.prompt-arrow { font-size: 26px; margin-bottom: 10px; }
+.prompt-title { font-size: 13px; color: #1f3864; font-weight: bold; margin-bottom: 4px; }
+.prompt-sub { font-size: 11px; font-style: italic; }
+
+.rinfo { display: none; }
+.rinfo.show { display: block; }
+
+.rhead { padding: 11px 15px; }
+.rhead h2 { font-size: 15px; color: white; margin-bottom: 3px; }
+.rhead p { font-size: 11.5px; color: rgba(255,255,255,0.88); font-style: italic; line-height: 1.4; }
+
+.section { padding: 11px 15px; }
+.section-label { font-size: 10px; font-weight: bold; color: #999; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 7px; }
+.srow { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f3f3f3; gap: 10px; }
+.srow:last-child { border-bottom: none; }
+.sk { font-size: 11.5px; color: #666; }
+.sv { font-size: 11.5px; font-weight: bold; text-align: right; }
+
+.facts { padding: 0 15px 12px; }
+.fitem { display: flex; gap: 7px; margin-bottom: 5px; align-items: flex-start; }
+.fdash { font-weight: bold; font-size: 13px; flex-shrink: 0; line-height: 1.4; }
+.ftext { font-size: 12px; color: #333; line-height: 1.4; }
+
+.dprompt { padding: 9px 15px; }
+.dprompt span { font-size: 11.5px; font-style: italic; font-weight: bold; }
+
+.chart { padding: 11px 15px; border-top: 1px solid #eee; }
+.brow { margin-bottom: 7px; }
+.blabels { display: flex; justify-content: space-between; margin-bottom: 2px; }
+.bname { font-size: 11px; color: #555; }
+.bval { font-size: 11px; font-weight: bold; }
+.btrack { height: 7px; background: #eee; border-radius: 4px; overflow: hidden; }
+.bfill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+
+/* ── Glossary tab ── */
+.gloss-wrap { padding: 14px 16px; }
+.gloss-intro { font-size: 11px; color: #888; font-style: italic; margin-bottom: 12px; }
+.gitem { margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid #f0f0f0; }
+.gitem:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+.gterm { font-size: 13px; font-weight: bold; color: #1f3864; margin-bottom: 3px; }
+.gdef { font-size: 12px; color: #444; line-height: 1.5; }
+
+/* ── Task tab ── */
+.task-wrap { padding: 14px 16px; }
+.task-hdr { background: #1f3864; color: white; padding: 10px 13px; border-radius: 3px; margin-bottom: 14px; }
+.task-hdr-title { font-size: 12px; font-weight: bold; margin-bottom: 2px; }
+.task-hdr-sub { font-size: 11px; color: #aaccff; font-style: italic; }
+.titem { margin-bottom: 14px; }
+.tqrow { display: flex; gap: 10px; align-items: flex-start; }
+.tnum { background: #1f3864; color: white; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; flex-shrink: 0; margin-top: 1px; }
+.tq { font-size: 13px; color: #222; line-height: 1.5; font-weight: bold; }
+.alines { margin-left: 32px; margin-top: 8px; }
+.aline { border-bottom: 1px solid #ccc; height: 24px; margin-bottom: 4px; }
+.task-note { background: #ebf2fb; border: 1px solid #2d5a9e33; border-radius: 3px; padding: 10px 12px; margin-top: 4px; }
+.task-note span { font-size: 12px; color: #2d5a9e; font-style: italic; }
+
+/* ── Footer ── */
+.footer { margin-top: 14px; background: #1f3864; color: white; padding: 12px 18px; border-radius: 4px; text-align: center; }
+.footer span { font-size: 12.5px; font-style: italic; color: #cce0ff; }
+</style>
+
+</head>
+<body>
+
+<div class="back-link"><a href="../index.html">← Back to Quizzes</a></div>
+
+<div class="header">
+  <div>
+    <div class="header-title">The UK North–South Divide</div>
+    <div class="header-sub">Q12 · UK Unit · Is the UK a united country?</div>
+  </div>
+  <button class="qr-btn" onclick="openQR()" title="Show QR code">⊞</button>
+</div>
+
+<div class="qr-modal" id="qrModal" onclick="if(event.target===this)closeQR()">
+  <div class="qr-box">
+    <div id="qrcode"></div>
+    <p>Scan to open on your device</p>
+    <button class="qr-close" onclick="closeQR()">Close</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- MAP -->
+
+  <div class="map-panel">
+    <svg id="ukMap" viewBox="0 0 270 480" width="220" height="392">
+      <rect x="0" y="0" width="270" height="480" fill="#cde4f5" rx="4"/>
 
 ```
-  {/* Header */}
-  <div style={{ background: C.navy, color: "white", padding: "12px 18px", marginBottom: "14px", borderRadius: "3px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-    <div>
-      <div style={{ fontSize: "17px", fontWeight: "bold" }}>The UK North–South Divide</div>
-      <div style={{ fontSize: "11px", color: "#AACCFF", fontStyle: "italic", marginTop: "2px" }}>Is the UK a united country?</div>
-    </div>
-    <div style={{ fontSize: "11px", color: "#AACCFF", textAlign: "right" }}>
-      Q12 · UK Unit
-    </div>
-  </div>
+  <path id="r-scotland" class="rpath" fill="#2563a8"
+    d="M 95 5 L 210 5 L 225 20 L 235 50 L 228 80 L 235 105 L 222 130 L 195 145 L 168 152 L 138 152 L 108 145 L 88 130 L 78 105 L 85 80 L 68 48 L 80 22 Z"
+    onclick="selectRegion('scotland')"/>
+  <text class="rlabel" x="155" y="75" text-anchor="middle" fill="white" font-size="9">Scotland</text>
 
-  <div style={{ display: "flex", gap: "14px", alignItems: "flex-start", flexWrap: "wrap" }}>
+  <path id="r-nireland" class="rpath" fill="#16873f"
+    d="M 18 108 L 58 95 L 65 115 L 68 138 L 48 148 L 20 138 Z"
+    onclick="selectRegion('nireland')"/>
+  <text class="rlabel" x="43" y="124" text-anchor="middle" fill="white" font-size="7">N.I.</text>
 
-    {/* ── MAP COLUMN ── */}
-    <div style={{ background: "white", border: "1.5px solid #ccd6e8", padding: "10px", borderRadius: "3px", flexShrink: 0 }}>
-      <svg viewBox="0 0 270 480" width="220" height="392" style={{ display: "block" }}>
-        <rect x="0" y="0" width="270" height="480" fill={C.sea} rx="4" />
-        {Object.entries(svgPaths).map(([key, d]) => {
-          const rd = regionData[key];
-          const isSel = selected === key;
-          const lp = labelPos[key];
-          return (
-            <g key={key} style={{ cursor: "pointer" }}
-              onClick={() => { setSelected(selected === key ? null : key); setTab(TAB.EXPLORE); }}>
-              <path d={d} fill={rd.color + (isSel ? "" : "CC")} stroke="white"
-                strokeWidth={isSel ? "2.5" : "1.5"} style={{ transition: "all 0.15s" }} />
-              {isSel && <path d={d} fill="none" stroke="white" strokeWidth="3" strokeDasharray="4 2" opacity="0.7" />}
-              {lp.lines.map((line, i) => (
-                <text key={i} x={lp.x}
-                  y={lp.y + i * (lp.small ? 9 : 11) - (lp.lines.length - 1) * (lp.small ? 4.5 : 5.5)}
-                  textAnchor="middle" fill="white"
-                  fontSize={lp.small ? "7" : "9"} fontWeight="bold"
-                  style={{ pointerEvents: "none", fontFamily: "Calibri,sans-serif" }}>
-                  {line}
-                </text>
-              ))}
-            </g>
-          );
-        })}
-      </svg>
+  <path id="r-north" class="rpath" fill="#b91c1c"
+    d="M 88 130 L 108 145 L 138 152 L 168 152 L 195 145 L 222 130 L 235 150 L 235 182 L 228 225 L 218 252 L 92 252 L 80 220 L 75 182 Z"
+    onclick="selectRegion('north')"/>
+  <text class="rlabel" x="157" y="189" text-anchor="middle" fill="white" font-size="9">The</text>
+  <text class="rlabel" x="157" y="200" text-anchor="middle" fill="white" font-size="9">North</text>
 
-      {/* Mini legend */}
-      <div style={{ marginTop: "8px", borderTop: "1px solid #eee", paddingTop: "8px" }}>
-        {Object.entries(regionData).map(([key, rd]) => (
-          <div key={key} style={{ display: "flex", alignItems: "center", gap: "6px", marginBottom: "3px", cursor: "pointer" }}
-            onClick={() => { setSelected(selected === key ? null : key); setTab(TAB.EXPLORE); }}>
-            <div style={{ width: "11px", height: "11px", background: rd.color, borderRadius: "2px", flexShrink: 0 }} />
-            <span style={{ fontSize: "10.5px", color: selected === key ? rd.color : "#555", fontWeight: selected === key ? "bold" : "normal" }}>
-              {rd.name}
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
+  <path id="r-wales" class="rpath" fill="#c2410c"
+    d="M 62 252 L 92 252 L 98 278 L 100 310 L 92 335 L 72 345 L 50 335 L 40 308 L 46 278 Z"
+    onclick="selectRegion('wales')"/>
+  <text class="rlabel" x="71" y="298" text-anchor="middle" fill="white" font-size="9">Wales</text>
 
-    {/* ── RIGHT COLUMN ── */}
-    <div style={{ flex: 1, minWidth: "280px" }}>
+  <path id="r-midlands" class="rpath" fill="#4a7fb5"
+    d="M 92 252 L 218 252 L 224 276 L 224 325 L 214 348 L 100 348 L 98 325 L 98 278 Z"
+    onclick="selectRegion('midlands')"/>
+  <text class="rlabel" x="160" y="303" text-anchor="middle" fill="white" font-size="9">Midlands</text>
 
-      {/* Tab bar */}
-      <div style={{ background: "white", border: "1.5px solid #ccd6e8", borderRadius: "3px 3px 0 0", display: "flex", borderBottom: "1px solid #eee" }}>
-        <button style={tabStyle(TAB.EXPLORE)} onClick={() => setTab(TAB.EXPLORE)}>Explore</button>
-        <button style={tabStyle(TAB.GLOSSARY)} onClick={() => setTab(TAB.GLOSSARY)}>Glossary</button>
-        <button style={tabStyle(TAB.TASK)} onClick={() => setTab(TAB.TASK)}>Your Task</button>
-      </div>
+  <path id="r-south" class="rpath" fill="#1f3864"
+    d="M 50 335 L 92 348 L 214 348 L 226 360 L 242 392 L 245 425 L 235 455 L 182 465 L 136 468 L 88 462 L 48 448 L 35 420 L 40 390 L 52 360 Z"
+    onclick="selectRegion('south')"/>
+  <text class="rlabel" x="152" y="405" text-anchor="middle" fill="white" font-size="9">London &amp;</text>
+  <text class="rlabel" x="152" y="416" text-anchor="middle" fill="white" font-size="9">the South</text>
+</svg>
 
-      {/* ── EXPLORE TAB ── */}
-      {tab === TAB.EXPLORE && (
-        <div style={{ background: "white", border: "1.5px solid #ccd6e8", borderTop: "none", borderRadius: "0 0 3px 3px" }}>
-          {!r ? (
-            <div style={{ padding: "24px", textAlign: "center", color: "#888" }}>
-              <div style={{ fontSize: "32px", marginBottom: "10px" }}>←</div>
-              <p style={{ fontSize: "13px", color: C.navy, fontWeight: "bold", margin: "0 0 4px 0" }}>Click a region on the map</p>
-              <p style={{ fontSize: "11px", margin: 0, fontStyle: "italic" }}>Explore data and key facts for each region of the UK.</p>
-            </div>
-          ) : (
-            <>
-              <div style={{ background: r.color, padding: "11px 15px" }}>
-                <div style={{ fontSize: "15px", fontWeight: "bold", color: "white", marginBottom: "3px" }}>{r.name}</div>
-                <div style={{ fontSize: "11.5px", color: "rgba(255,255,255,0.88)", fontStyle: "italic", lineHeight: "1.4" }}>{r.headline}</div>
-              </div>
-              <div style={{ padding: "11px 15px" }}>
-                <div style={{ fontSize: "10px", fontWeight: "bold", color: "#999", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "7px" }}>Key Data</div>
-                {r.stats.map(([label, value], i) => (
-                  <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: i < r.stats.length - 1 ? "1px solid #f3f3f3" : "none", gap: "10px" }}>
-                    <span style={{ fontSize: "11.5px", color: "#666" }}>{label}</span>
-                    <span style={{ fontSize: "11.5px", color: C.navy, fontWeight: "bold", textAlign: "right" }}>{value}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ padding: "0 15px 12px 15px" }}>
-                <div style={{ fontSize: "10px", fontWeight: "bold", color: "#999", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "7px" }}>Key Facts</div>
-                {r.facts.map((fact, i) => (
-                  <div key={i} style={{ display: "flex", gap: "7px", marginBottom: "5px", alignItems: "flex-start" }}>
-                    <span style={{ color: r.color, fontWeight: "bold", flexShrink: 0 }}>–</span>
-                    <span style={{ fontSize: "12px", color: "#333", lineHeight: "1.4" }}>{fact}</span>
-                  </div>
-                ))}
-              </div>
-              <div style={{ background: r.light, padding: "9px 15px", borderTop: `1px solid ${r.color}33` }}>
-                <span style={{ fontSize: "11.5px", color: r.color, fontStyle: "italic", fontWeight: "bold" }}>
-                  Think: How does this connect to "Is the UK a united country?"
-                </span>
-              </div>
-            </>
-          )}
-
-          {/* Life expectancy bar chart */}
-          <div style={{ padding: "11px 15px", borderTop: "1px solid #eee" }}>
-            <div style={{ fontSize: "10px", fontWeight: "bold", color: "#999", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "9px" }}>Life Expectancy Comparison (Male)</div>
-            {lifeExp.map(({ key, val }) => (
-              <div key={key} style={{ marginBottom: "6px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}>
-                  <span style={{ fontSize: "11px", color: "#555" }}>{regionData[key].name}</span>
-                  <span style={{ fontSize: "11px", fontWeight: "bold", color: regionData[key].color }}>{val} yrs</span>
-                </div>
-                <div style={{ height: "7px", background: "#eee", borderRadius: "4px", overflow: "hidden" }}>
-                  <div style={{ height: "100%", width: `${((val - 75) / (81.3 - 75)) * 100}%`, background: regionData[key].color, borderRadius: "4px", transition: "width 0.4s" }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* ── GLOSSARY TAB ── */}
-      {tab === TAB.GLOSSARY && (
-        <div style={{ background: "white", border: "1.5px solid #ccd6e8", borderTop: "none", borderRadius: "0 0 3px 3px", padding: "14px 16px" }}>
-          <p style={{ fontSize: "11px", color: "#888", fontStyle: "italic", margin: "0 0 12px 0" }}>
-            Key terms for understanding the North-South Divide.
-          </p>
-          {glossary.map(({ term, def }, i) => (
-            <div key={i} style={{ marginBottom: "12px", paddingBottom: "12px", borderBottom: i < glossary.length - 1 ? "1px solid #f0f0f0" : "none" }}>
-              <div style={{ fontSize: "13px", fontWeight: "bold", color: C.navy, marginBottom: "3px" }}>{term}</div>
-              <div style={{ fontSize: "12px", color: "#444", lineHeight: "1.5" }}>{def}</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── TASK TAB ── */}
-      {tab === TAB.TASK && (
-        <div style={{ background: "white", border: "1.5px solid #ccd6e8", borderTop: "none", borderRadius: "0 0 3px 3px", padding: "14px 16px" }}>
-          <div style={{ background: C.navy, color: "white", padding: "10px 13px", borderRadius: "3px", marginBottom: "14px" }}>
-            <div style={{ fontSize: "12px", fontWeight: "bold", marginBottom: "2px" }}>North–South Divide – Map Task</div>
-            <div style={{ fontSize: "11px", color: "#AACCFF", fontStyle: "italic" }}>Explore the map. Then answer the questions below.</div>
-          </div>
-          {taskQuestions.map(({ n, q }) => (
-            <div key={n} style={{ marginBottom: "14px" }}>
-              <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-                <div style={{ background: C.navy, color: "white", width: "20px", height: "20px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: "bold", flexShrink: 0, marginTop: "1px" }}>{n}</div>
-                <div style={{ fontSize: "13px", color: "#222", lineHeight: "1.5", fontWeight: "bold" }}>{q}</div>
-              </div>
-              {/* Answer lines */}
-              <div style={{ marginLeft: "30px", marginTop: "8px" }}>
-                {[1, 2, 3].map(i => (
-                  <div key={i} style={{ borderBottom: "1px solid #ccc", height: "24px", marginBottom: "4px" }} />
-                ))}
-              </div>
-            </div>
-          ))}
-          <div style={{ background: "#EBF2FB", border: `1px solid ${C.navy}33`, borderRadius: "3px", padding: "10px 12px", marginTop: "6px" }}>
-            <span style={{ fontSize: "12px", color: C.navy, fontStyle: "italic" }}>
-              Keep your answers – you will return to question 3 at the end of the unit.
-            </span>
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-
-  {/* Footer */}
-  <div style={{ marginTop: "14px", background: C.navy, color: "white", padding: "11px 18px", borderRadius: "3px", textAlign: "center" }}>
-    <span style={{ fontSize: "12.5px", fontStyle: "italic", color: "#cce0ff" }}>
-      "The North-South divide is not just about money – it is about power, opportunity, and who the UK is really for."
-    </span>
-  </div>
-
+<div class="legend">
+  <div class="leg-item" id="leg-scotland" onclick="selectRegion('scotland')"><div class="leg-dot" style="background:#2563a8"></div><span class="leg-text">Scotland</span></div>
+  <div class="leg-item" id="leg-nireland" onclick="selectRegion('nireland')"><div class="leg-dot" style="background:#16873f"></div><span class="leg-text">Northern Ireland</span></div>
+  <div class="leg-item" id="leg-north" onclick="selectRegion('north')"><div class="leg-dot" style="background:#b91c1c"></div><span class="leg-text">The North</span></div>
+  <div class="leg-item" id="leg-wales" onclick="selectRegion('wales')"><div class="leg-dot" style="background:#c2410c"></div><span class="leg-text">Wales</span></div>
+  <div class="leg-item" id="leg-midlands" onclick="selectRegion('midlands')"><div class="leg-dot" style="background:#4a7fb5"></div><span class="leg-text">The Midlands</span></div>
+  <div class="leg-item" id="leg-south" onclick="selectRegion('south')"><div class="leg-dot" style="background:#1f3864"></div><span class="leg-text">London &amp; the South</span></div>
 </div>
 ```
 
-);
+  </div>
+
+  <!-- INFO PANEL -->
+
+  <div class="info-panel">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="setTab('explore')">Explore</button>
+      <button class="tab-btn" onclick="setTab('glossary')">Glossary</button>
+      <button class="tab-btn" onclick="setTab('task')">Your Task</button>
+    </div>
+
+```
+<!-- EXPLORE -->
+<div class="tab-pane active" id="tab-explore">
+  <div class="prompt" id="regionPrompt">
+    <div class="prompt-arrow">←</div>
+    <div class="prompt-title">Click a region on the map</div>
+    <div class="prompt-sub">Explore key data and facts for each region of the UK.</div>
+  </div>
+  <div class="rinfo" id="regionInfo">
+    <div class="rhead" id="regionHead"><h2 id="rName"></h2><p id="rHeadline"></p></div>
+    <div class="section">
+      <div class="section-label">Key Data</div>
+      <div id="rStats"></div>
+    </div>
+    <div class="facts">
+      <div class="section-label">Key Facts</div>
+      <div id="rFacts"></div>
+    </div>
+    <div class="dprompt" id="rDPrompt"><span id="rDText"></span></div>
+  </div>
+  <div class="chart">
+    <div class="section-label">Life Expectancy Comparison (Male)</div>
+    <div id="lifeChart"></div>
+  </div>
+</div>
+
+<!-- GLOSSARY -->
+<div class="tab-pane" id="tab-glossary">
+  <div class="gloss-wrap">
+    <p class="gloss-intro">Key terms for understanding the North-South Divide.</p>
+    <div id="glossList"></div>
+  </div>
+</div>
+
+<!-- TASK -->
+<div class="tab-pane" id="tab-task">
+  <div class="task-wrap">
+    <div class="task-hdr">
+      <div class="task-hdr-title">North-South Divide – Map Task</div>
+      <div class="task-hdr-sub">Explore the map. Then answer the questions below.</div>
+    </div>
+    <div id="taskList"></div>
+    <div class="task-note"><span>Keep your answers – you will return to question 3 at the end of the unit.</span></div>
+  </div>
+</div>
+```
+
+  </div>
+</div>
+
+<div class="footer">
+  <span>"The North-South divide is not just about money – it is about power, opportunity, and who the UK is really for."</span>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+<script>
+const REGIONS = {
+  scotland: {
+    name:"Scotland", color:"#2563a8", light:"#dbeafe",
+    headline:"Voted strongly Remain. The Brexit result – decided by English votes – has reignited demands for a second independence referendum.",
+    stats:[["Life expectancy","78.0 / 81.8 yrs (M/F)"],["GVA per person","£28,300"],["Weekly earnings","£608 median"],["Unemployment","4.1%"],["Brexit vote","62% Remain"]],
+    facts:["SNP has demanded IndyRef2 since the 2016 Brexit vote","62% of Scots voted Remain – taken out of the EU against their will","Devolved Parliament (Holyrood) with significant powers since 1999","North Sea oil remains a central argument for independence"],
+    lifeExp:78.0
+  },
+  nireland: {
+    name:"Northern Ireland", color:"#16873f", light:"#dcfce7",
+    headline:"The most complex case: Brexit threatens the Good Friday Agreement and the open border with the Republic of Ireland.",
+    stats:[["Life expectancy","78.3 / 82.2 yrs (M/F)"],["GVA per person","£22,800"],["Weekly earnings","£560 median"],["Unemployment","2.8%"],["Brexit vote","56% Remain"]],
+    facts:["Only UK region sharing a land border with an EU member state","Good Friday Agreement (1998) ended decades of sectarian conflict","Brexit created the divisive 'Northern Ireland Protocol'","Sinn Féin became the largest party in 2022 – a historic first since partition"],
+    lifeExp:78.3
+  },
+  north: {
+    name:"The North", color:"#b91c1c", light:"#fee2e2",
+    headline:"Former industrial heartland – coal, steel, shipbuilding. Home to the 'Red Wall' and the sharpest end of the North-South divide.",
+    stats:[["Life expectancy","77.6 / 81.5 yrs – lowest in England"],["GVA per person","~£21,500 (North East)"],["Weekly earnings","~£530 median"],["Unemployment","5.2% (North East)"],["Brexit vote","Strong Leave majority"]],
+    facts:["North East has the lowest GVA per person in England","Life expectancy up to 4 years shorter than in London","Highest rates of child poverty in the UK","'Red Wall' seats switched Labour → Conservative in 2019, then back in 2024","Government's 'Levelling Up' agenda widely seen as underfunded"],
+    lifeExp:77.6
+  },
+  wales: {
+    name:"Wales", color:"#c2410c", light:"#ffedd5",
+    headline:"One of the UK's poorest regions – and one that received major EU funding. Yet it voted Leave. A striking paradox.",
+    stats:[["Life expectancy","79.0 / 82.8 yrs (M/F)"],["GVA per person","~£22,500 – lowest in Great Britain"],["Weekly earnings","~£540 median"],["Unemployment","3.9%"],["Brexit vote","52.5% Leave"]],
+    facts:["Received more EU structural funds than it contributed","Despite this, 52.5% voted Leave in 2016","Devolved assembly (Senedd) with its own parliament since 1999","Heavy deindustrialisation in the South Wales valleys"],
+    lifeExp:79.0
+  },
+  midlands: {
+    name:"The Midlands", color:"#4a7fb5", light:"#e0eaf5",
+    headline:"A mixed picture: industrial heritage alongside new investment. Birmingham is the UK's second largest city.",
+    stats:[["Life expectancy","79.2 / 82.9 yrs (M/F)"],["GVA per person","~£24,000"],["Weekly earnings","~£590 median"],["Unemployment","4.4%"],["Brexit vote","Majority Leave"]],
+    facts:["Birmingham: UK's second largest city, majority non-white British","Manufacturing base: cars (Jaguar Land Rover), engineering","Voted Leave in 2016 across most constituencies","Significant 'Levelling Up' investment targeted here"],
+    lifeExp:79.2
+  },
+  south: {
+    name:"London & the South", color:"#1f3864", light:"#e8eef7",
+    headline:"The UK's economic engine – home to global finance, government, and the highest salaries. Also the epicentre of the housing crisis.",
+    stats:[["Life expectancy","81.3 / 84.9 yrs (M/F)"],["GVA per person","£57,000 (London)"],["Weekly earnings","£780/week (London median)"],["Unemployment","3.8%"],["Brexit vote","London: 60% Remain"]],
+    facts:["London alone generates ~25% of UK GDP","Average London house price: over £700,000","Life expectancy up to 4 years longer than the North East","78% of Londoners voted Remain – major cultural divide with the rest of England","'London vs the rest' is a defining tension in modern British politics"],
+    lifeExp:81.3
+  }
+};
+
+const GLOSSARY = [
+  {term:"GVA (Gross Value Added)", def:"The economic output of a region – similar to GDP. A key measure of regional wealth and productivity."},
+  {term:"Deindustrialisation", def:"The decline of traditional manufacturing industries such as coal mining, steelworks, and shipbuilding – which dominated the North and Wales until their collapse from the 1970s–80s."},
+  {term:"Thatcherism", def:"The economic policies of Prime Minister Margaret Thatcher (1979–1990). She closed nationalised industries – coal, steel, shipbuilding – concentrated in the North and Wales, broke the trade unions, and shifted the economy toward finance and services centred in London. Communities that lost their industrial base in the 1980s have never fully recovered, making Thatcherism a direct cause of today's North-South divide."},
+  {term:"The Red Wall", def:"A line of traditionally Labour-voting seats in the North and Midlands that switched to the Conservative Party in 2019. Many switched back to Labour in 2024."},
+  {term:"Levelling Up", def:"Boris Johnson's government policy (2019–2022) to reduce regional economic inequality between London/South and the rest of the UK. Widely criticised as underfunded and largely ineffective."},
+  {term:"Devolved Parliament", def:"A regional government with its own decision-making powers, separate from Westminster. Scotland (Holyrood), Wales (Senedd), and Northern Ireland (Stormont) all have devolved assemblies."},
+  {term:"Life Expectancy Gap", def:"Men in the North East live up to 4 years less than men in London. This reflects differences in poverty, healthcare access, employment, and lifestyle factors."}
+];
+
+const TASKS = [
+  "Note down two differences between the North and London & the South that you find striking.",
+  "What do you think caused these differences? Note at least one idea.",
+  "Does this data suggest the UK is a united country? Note your first instinct – we will return to this question at the end of the unit."
+];
+
+let current = null;
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', function() {
+  buildChart(); buildGlossary(); buildTasks();
+  new QRCode(document.getElementById('qrcode'), {
+    text: window.location.href, width:160, height:160,
+    colorDark:'#1f3864', colorLight:'#ffffff'
+  });
+});
+
+// ── Select region ─────────────────────────────────────────────────────────────
+function selectRegion(key) {
+  if (current) {
+    document.getElementById('r-'+current).classList.remove('sel');
+    document.getElementById('leg-'+current).classList.remove('sel');
+  }
+  if (current === key) {
+    current = null;
+    document.getElementById('regionPrompt').style.display = 'block';
+    document.getElementById('regionInfo').classList.remove('show');
+    return;
+  }
+  current = key;
+  document.getElementById('r-'+key).classList.add('sel');
+  document.getElementById('leg-'+key).classList.add('sel');
+  setTab('explore');
+
+  const r = REGIONS[key];
+  document.getElementById('regionPrompt').style.display = 'none';
+  document.getElementById('regionInfo').classList.add('show');
+
+  const head = document.getElementById('regionHead');
+  head.style.background = r.color;
+  document.getElementById('rName').textContent = r.name;
+  document.getElementById('rHeadline').textContent = r.headline;
+
+  document.getElementById('rStats').innerHTML = r.stats.map(([k,v]) =>
+    `<div class="srow"><span class="sk">${k}</span><span class="sv" style="color:${r.color}">${v}</span></div>`
+  ).join('');
+
+  document.getElementById('rFacts').innerHTML = r.facts.map(f =>
+    `<div class="fitem"><span class="fdash" style="color:${r.color}">–</span><span class="ftext">${f}</span></div>`
+  ).join('');
+
+  const dp = document.getElementById('rDPrompt');
+  dp.style.background = r.light;
+  dp.style.borderTop = '1px solid '+r.color+'33';
+  const dt = document.getElementById('rDText');
+  dt.style.color = r.color;
+  dt.textContent = 'Think: How does this connect to "Is the UK a united country?"';
 }
+
+// ── Life exp chart ────────────────────────────────────────────────────────────
+function buildChart() {
+  const data = Object.entries(REGIONS)
+    .map(([k,r]) => ({name:r.name, val:r.lifeExp, color:r.color}))
+    .sort((a,b) => b.val - a.val);
+  document.getElementById('lifeChart').innerHTML = data.map(({name,val,color}) => {
+    const pct = ((val - 75) / (81.3 - 75)) * 100;
+    return `<div class="brow">
+      <div class="blabels"><span class="bname">${name}</span><span class="bval" style="color:${color}">${val} yrs</span></div>
+      <div class="btrack"><div class="bfill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── Glossary ──────────────────────────────────────────────────────────────────
+function buildGlossary() {
+  document.getElementById('glossList').innerHTML = GLOSSARY.map(({term,def}) =>
+    `<div class="gitem"><div class="gterm">${term}</div><div class="gdef">${def}</div></div>`
+  ).join('');
+}
+
+// ── Tasks ─────────────────────────────────────────────────────────────────────
+function buildTasks() {
+  document.getElementById('taskList').innerHTML = TASKS.map((q,i) =>
+    `<div class="titem">
+      <div class="tqrow">
+        <div class="tnum">${i+1}</div>
+        <div class="tq">${q}</div>
+      </div>
+      <div class="alines">${'<div class="aline"></div>'.repeat(3)}</div>
+    </div>`
+  ).join('');
+}
+
+// ── Tabs ──────────────────────────────────────────────────────────────────────
+function setTab(name) {
+  const tabs = ['explore','glossary','task'];
+  document.querySelectorAll('.tab-btn').forEach((b,i) => b.classList.toggle('active', tabs[i]===name));
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id==='tab-'+name));
+}
+
+// ── QR ────────────────────────────────────────────────────────────────────────
+function openQR()  { document.getElementById('qrModal').classList.add('open'); }
+function closeQR() { document.getElementById('qrModal').classList.remove('open'); }
+</script>
+
+</body>
+</html>
