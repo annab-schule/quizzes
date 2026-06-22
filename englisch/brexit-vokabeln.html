@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="quiz-meta" content="Q12 · Brexit or Bregret? – Vocabulary Wheel">
+  <title>Brexit Vocabulary Wheel · Q12</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #f0f4ff;
+      font-family: -apple-system, 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* ── header ── */
+    header {
+      width: 100%;
+      background: #1F3864;
+      color: #ffffff;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    header h1 {
+      font-family: Palatino, Georgia, serif;
+      font-size: 1.15rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+    header span {
+      font-size: .78rem;
+      opacity: .65;
+      margin-left: 10px;
+    }
+
+    /* ── QR button ── */
+    #qr-btn {
+      background: rgba(255,255,255,.15);
+      border: none;
+      color: #fff;
+      font-size: 1.1rem;
+      width: 36px; height: 36px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    #qr-btn:hover { background: rgba(255,255,255,.28); }
+    #qr-modal {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 999;
+      align-items: center; justify-content: center;
+    }
+    #qr-modal.open { display: flex; }
+    #qr-box {
+      background: #fff;
+      border-radius: 12px;
+      padding: 28px 32px;
+      text-align: center;
+      box-shadow: 0 8px 32px rgba(0,0,0,.2);
+    }
+    #qr-box p { margin-top: 14px; font-size: .82rem; color: #555; }
+    #qr-close {
+      margin-top: 16px;
+      background: #1F3864; color: #fff;
+      border: none; border-radius: 6px;
+      padding: 8px 22px; cursor: pointer; font-size: .85rem;
+    }
+
+    /* ── views ── */
+    #view-wheel, #view-card { width: 100%; max-width: 640px; padding: 0 20px; }
+    #view-card { display: none; }
+
+    /* ── wheel view ── */
+    .wheel-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 28px 0 20px;
+      gap: 22px;
+    }
+
+    /* Canvas + pointer wrapper */
+    .canvas-wrap {
+      position: relative;
+      width: 340px; height: 340px;
+    }
+    #wheel-canvas {
+      border-radius: 50%;
+      box-shadow: 0 4px 24px rgba(31,56,100,.18);
+      display: block;
+    }
+    /* Triangle pointer */
+    .pointer {
+      position: absolute;
+      top: 50%;
+      right: -18px;
+      transform: translateY(-50%);
+      width: 0; height: 0;
+      border-top: 14px solid transparent;
+      border-bottom: 14px solid transparent;
+      border-right: 28px solid #c9292b;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+    }
+
+    #spin-btn {
+      background: #2d5a9e;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 14px 48px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: .03em;
+      box-shadow: 0 3px 12px rgba(45,90,158,.3);
+      transition: background .2s, transform .1s;
+    }
+    #spin-btn:hover { background: #1e4480; }
+    #spin-btn:active { transform: scale(.97); }
+    #spin-btn:disabled {
+      background: #aab8d4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* landed term display */
+    #landed-wrap {
+      min-height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #landed-term {
+      font-family: Palatino, Georgia, serif;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #1F3864;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(6px);
+      transition: opacity .4s, transform .4s;
+    }
+    #landed-term.show { opacity: 1; transform: translateY(0); }
+
+    #resolve-btn {
+      display: none;
+      background: #fff;
+      color: #1F3864;
+      border: 2px solid #1F3864;
+      border-radius: 50px;
+      padding: 10px 36px;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    #resolve-btn:hover { background: #1F3864; color: #fff; }
+
+    /* ── card view ── */
+    .card-wrap {
+      padding: 32px 0 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 22px;
+    }
+
+    .flash-card {
+      width: 100%;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(31,56,100,.13);
+      overflow: hidden;
+    }
+    .flash-card-header {
+      background: #1F3864;
+      padding: 24px 28px 20px;
+      text-align: center;
+    }
+    .flash-card-header h2 {
+      font-family: Palatino, Georgia, serif;
+      font-size: 1.9rem;
+      color: #fff;
+      font-weight: 700;
+    }
+    .flash-card-body {
+      padding: 26px 28px 28px;
+    }
+    .flash-card-body p {
+      font-size: 1.02rem;
+      line-height: 1.65;
+      color: #222;
+    }
+
+    #back-btn {
+      background: #2d5a9e;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 40px;
+      font-size: .97rem;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 3px 12px rgba(45,90,158,.25);
+      transition: background .2s;
+    }
+    #back-btn:hover { background: #1e4480; }
+
+    footer {
+      margin-top: auto;
+      padding: 18px;
+      font-size: .72rem;
+      color: #8898b8;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div>
+    <h1>Brexit Vocabulary Wheel</h1>
+    <span>Q12 · Brexit or Bregret?</span>
+  </div>
+  <button id="qr-btn" title="QR Code">⊞</button>
+</header>
+
+<!-- QR MODAL -->
+<div id="qr-modal">
+  <div id="qr-box">
+    <div id="qr-code"></div>
+    <p>Scan to open on your device</p>
+    <button id="qr-close">Close</button>
+  </div>
+</div>
+
+<!-- WHEEL VIEW -->
+<div id="view-wheel">
+  <div class="wheel-wrap">
+    <div class="canvas-wrap">
+      <canvas id="wheel-canvas" width="340" height="340"></canvas>
+      <div class="pointer"></div>
+    </div>
+
+    <button id="spin-btn">Spin the Wheel</button>
+
+    <div id="landed-wrap">
+      <div id="landed-term"></div>
+      <button id="resolve-btn">Show Definition</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARD VIEW -->
+<div id="view-card">
+  <div class="card-wrap">
+    <div class="flash-card">
+      <div class="flash-card-header">
+        <h2 id="card-term"></h2>
+      </div>
+      <div class="flash-card-body">
+        <p id="card-def"></p>
+      </div>
+    </div>
+    <button id="back-btn">← Back to Wheel</button>
+  </div>
+</div>
+
+<footer>Q12 English · Gymnasium Wendelstein · Brexit or Bregret?</footer>
+
+<script>
+  // ── data ────────────────────────────────────────────────────────────────────
+  const CARDS = [
+    { term: "Northern Ireland",
+      def:  "Part of the UK on the island of Ireland. After Brexit, the NI Protocol kept it aligned with EU rules to avoid a hard border with the Republic of Ireland." },
+    { term: "Brexit",
+      def:  "'Britain' + 'Exit' — the process by which the UK left the European Union, following the 2016 referendum." },
+    { term: "Bregret",
+      def:  "'Brexit' + 'Regret' — growing public regret about leaving the EU. Since July 2022, over 50% of Britons consistently say leaving was the wrong decision." },
+    { term: "Boris Johnson",
+      def:  "UK Prime Minister 2019–2022. Led the Conservatives with the slogan 'Get Brexit Done'. Refused to grant Scotland a second independence referendum." },
+    { term: "Keir Starmer",
+      def:  "Labour Prime Minister elected July 2024. Promised a 'reset' with the EU but ruled out rejoining the Single Market or Customs Union." },
+    { term: "sovereignty",
+      def:  "The right to govern a country independently. 'Taking back control' of sovereignty was the central argument of the Leave campaign." },
+    { term: "2016",
+      def:  "Year of the Brexit referendum (23 June). Result: 52% Leave · 48% Remain. Scotland: 62% Remain. Northern Ireland: 56% Remain." },
+    { term: "2020",
+      def:  "The UK officially left the EU on 31 January 2020, and left the Single Market and Customs Union on 1 January 2021." },
+    { term: "to offset",
+      def:  "To compensate for something negative; to balance it out. \"New trade deals have not offset the loss of EU trade.\"" },
+    { term: "to discern",
+      def:  "To recognise something not immediately obvious. \"It is hard to discern any clear economic benefit from Brexit.\"" },
+    { term: "to sour on",
+      def:  "To become negative or disappointed about something over time. \"Public opinion has soured on Brexit.\" (AP article)" },
+    { term: "red tape",
+      def:  "Excessive bureaucracy and paperwork. After Brexit, new customs checks created significant red tape for businesses trading with the EU." },
+    { term: "EU Single Market",
+      def:  "The EU's internal area where goods, services, capital and people move freely. The UK left the Single Market on 1 January 2021." },
+  ];
+
+  // ── colour palette for segments ─────────────────────────────────────────────
+  const PALETTE = [
+    "#1F3864","#2d5a9e","#3a6fbd","#1a4f8a",
+    "#254d87","#163060","#2a5498","#1d3a6e",
+    "#315fa8","#1b3560","#2b5ba0","#174082","#233d76"
+  ];
+
+  // ── canvas setup ─────────────────────────────────────────────────────────────
+  const canvas = document.getElementById('wheel-canvas');
+  const ctx    = canvas.getContext('2d');
+  const CX = canvas.width  / 2;
+  const CY = canvas.height / 2;
+  const R  = CX - 4;
+  const N  = CARDS.length;
+  const ARC = (2 * Math.PI) / N;
+
+  let currentAngle = 0;
+  let spinning     = false;
+  let landedIdx    = -1;
+  const used       = new Set();   // indices already seen
+
+  function drawWheel(angle) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < N; i++) {
+      const start   = angle + i * ARC;
+      const end     = start + ARC;
+      const mid     = start + ARC / 2;
+      const isUsed  = used.has(i);
+
+      // segment fill
+      ctx.beginPath();
+      ctx.moveTo(CX, CY);
+      ctx.arc(CX, CY, R, start, end);
+      ctx.closePath();
+      ctx.fillStyle = isUsed ? "#cccccc" : PALETTE[i % PALETTE.length];
+      ctx.fill();
+      ctx.strokeStyle = "rgba(255,255,255,.25)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // label
+      ctx.save();
+      ctx.translate(CX, CY);
+      ctx.rotate(mid);
+      ctx.textAlign  = "right";
+      ctx.fillStyle  = isUsed ? "#888888" : "#ffffff";
+      ctx.globalAlpha = isUsed ? 0.6 : 1;
+
+      const term = CARDS[i].term;
+      const fs   = term.length > 14 ? 10 : term.length > 10 ? 11 : 12.5;
+      ctx.font   = `${isUsed ? '400' : '600'} ${fs}px -apple-system, 'Segoe UI', sans-serif`;
+
+      const words = term.split(' ');
+      if (words.length > 1 && ctx.measureText(term).width > R - 28) {
+        const half  = Math.ceil(words.length / 2);
+        ctx.fillText(words.slice(0, half).join(' '), R - 14, -5);
+        ctx.fillText(words.slice(half).join(' '),    R - 14,  9);
+      } else {
+        ctx.fillText(term, R - 14, 4);
+      }
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    }
+
+    // centre cap
+    ctx.beginPath();
+    ctx.arc(CX, CY, 18, 0, 2 * Math.PI);
+    ctx.fillStyle   = "#fff";
+    ctx.fill();
+    ctx.strokeStyle = "#1F3864";
+    ctx.lineWidth   = 2;
+    ctx.stroke();
+  }
+
+  drawWheel(currentAngle);
+
+  // ── helpers ───────────────────────────────────────────────────────────────────
+  function getLandedIndex(angle) {
+    const norm = ((2 * Math.PI) - (angle % (2 * Math.PI))) % (2 * Math.PI);
+    return Math.floor(norm / ARC) % N;
+  }
+
+  // Pick a random target angle that lands on an unused segment
+  function randomUnusedTarget(fromAngle) {
+    const remaining = [];
+    for (let i = 0; i < N; i++) { if (!used.has(i)) remaining.push(i); }
+    const target = remaining[Math.floor(Math.random() * remaining.length)];
+    // Centre of target segment in wheel space
+    const segCentre = target * ARC + ARC / 2;
+    // We need: (2π - (finalAngle % 2π)) % 2π  ≈  segCentre
+    // So finalAngle % 2π ≈ 2π - segCentre  (± small jitter)
+    const jitter    = (Math.random() - 0.5) * ARC * 0.6;
+    const wantMod   = (2 * Math.PI - segCentre + jitter + 2 * Math.PI) % (2 * Math.PI);
+    const extraSpins = 5 + Math.floor(Math.random() * 5);
+    return fromAngle + extraSpins * 2 * Math.PI + wantMod - (fromAngle % (2 * Math.PI));
+  }
+
+  function checkAllDone() {
+    if (used.size === N) {
+      document.getElementById('spin-btn').textContent = '🎉 All done! Reload to restart.';
+      document.getElementById('spin-btn').disabled = true;
+    }
+  }
+
+  // ── spin ─────────────────────────────────────────────────────────────────────
+  document.getElementById('spin-btn').addEventListener('click', () => {
+    if (spinning || used.size === N) return;
+    spinning = true;
+
+    const landedEl   = document.getElementById('landed-term');
+    const resolveBtn = document.getElementById('resolve-btn');
+    landedEl.classList.remove('show');
+    resolveBtn.style.display = 'none';
+    document.getElementById('spin-btn').disabled = true;
+
+    const targetAngle = randomUnusedTarget(currentAngle);
+    const duration    = 3200 + Math.random() * 1200;
+    const startAngle  = currentAngle;
+    const totalDelta  = targetAngle - startAngle;
+    let   startTime   = null;
+
+    function easeOut(t) { return 1 - Math.pow(1 - t, 3); }
+
+    function animate(ts) {
+      if (!startTime) startTime = ts;
+      const progress = Math.min((ts - startTime) / duration, 1);
+      currentAngle   = startAngle + totalDelta * easeOut(progress);
+      drawWheel(currentAngle);
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      } else {
+        currentAngle = targetAngle;
+        drawWheel(currentAngle);
+        spinning  = false;
+        landedIdx = getLandedIndex(currentAngle);
+
+        // mark as used & redraw grey
+        used.add(landedIdx);
+        drawWheel(currentAngle);
+
+        landedEl.textContent = CARDS[landedIdx].term;
+        landedEl.classList.add('show');
+        resolveBtn.style.display = 'block';
+        if (used.size < N) document.getElementById('spin-btn').disabled = false;
+        checkAllDone();
+      }
+    }
+
+    requestAnimationFrame(animate);
+  });
+
+  // ── resolve → card view ──────────────────────────────────────────────────────
+  document.getElementById('resolve-btn').addEventListener('click', () => {
+    if (landedIdx < 0) return;
+    document.getElementById('card-term').textContent = CARDS[landedIdx].term;
+    document.getElementById('card-def').textContent  = CARDS[landedIdx].def;
+    document.getElementById('view-wheel').style.display = 'none';
+    document.getElementById('view-card').style.display  = 'block';
+  });
+
+  // ── back button ──────────────────────────────────────────────────────────────
+  document.getElementById('back-btn').addEventListener('click', () => {
+    document.getElementById('view-card').style.display  = 'none';
+    document.getElementById('view-wheel').style.display = 'block';
+  });
+
+  // ── QR code ──────────────────────────────────────────────────────────────────
+  const GITHUB_URL = "https://annab-schule.github.io/quizzes/englisch/brexit-vocabulary-wheel.html";
+  const QR_URL = (window.location.protocol === 'file:') ? GITHUB_URL : window.location.href;
+
+  let qrGenerated = false;
+  document.getElementById('qr-btn').addEventListener('click', () => {
+    document.getElementById('qr-modal').classList.add('open');
+    if (!qrGenerated) {
+      new QRCode(document.getElementById('qr-code'), {
+        text: QR_URL,
+        width: 180, height: 180,
+        colorDark: "#1F3864", colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+      const urlEl = document.createElement('p');
+      urlEl.style.cssText = 'font-size:.65rem;color:#888;word-break:break-all;max-width:200px;margin-top:6px;';
+      urlEl.textContent = QR_URL;
+      document.getElementById('qr-box').insertBefore(urlEl, document.getElementById('qr-close'));
+      qrGenerated = true;
+    }
+  });
+  document.getElementById('qr-close').addEventListener('click', () => {
+    document.getElementById('qr-modal').classList.remove('open');
+  });
+  document.getElementById('qr-modal').addEventListener('click', e => {
+    if (e.target === document.getElementById('qr-modal'))
+      document.getElementById('qr-modal').classList.remove('open');
+  });
+</script>
+</body>
+</html>
